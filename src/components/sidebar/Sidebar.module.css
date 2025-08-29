@@ -1,0 +1,545 @@
+/* Sidebar.module.css */
+
+/* Sidebar principal */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: width 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+/* Estado colapsado (como YouTube) */
+.sidebar.collapsed {
+  width: 72px;
+}
+
+/* Estado móvil */
+.sidebar.mobile {
+  width: 280px;
+  transform: translateX(-100%);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar.mobile.mobileOpen {
+  transform: translateX(0);
+}
+
+/* Header del sidebar */
+.sidebarHeader {
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.sidebarLogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.logoImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f0f0f0;
+}
+
+.logoText {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+/* Botón toggle mejorado */
+.toggleButton {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.toggleButton:hover {
+  background: #333;
+  color: white;
+}
+
+/* Ícono hamburguesa para desktop */
+.hamburgerIcon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  width: 18px;
+  height: 14px;
+}
+
+.hamburgerIcon span {
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* Animación del botón cuando está colapsado */
+.collapsed .hamburgerIcon span:nth-child(1) {
+  transform: rotate(45deg) translate(3px, 3px);
+}
+
+.collapsed .hamburgerIcon span:nth-child(2) {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.collapsed .hamburgerIcon span:nth-child(3) {
+  transform: rotate(-45deg) translate(3px, -3px);
+}
+
+/* En modo colapsado, posicionar el botón de manera más visible */
+.collapsed .sidebarHeader {
+  justify-content: center;
+  padding: 16px 8px;
+}
+
+.collapsed .toggleButton {
+  margin: 0;
+  background: #333;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.collapsed .toggleButton:hover {
+  background: #444;
+  transform: scale(1.05);
+}
+
+/* Contenido del sidebar con scroll inteligente */
+.sidebarContent {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+  /* Solo mostrar scrollbar cuando hay contenido que lo requiera */
+  scrollbar-width: thin;
+  scrollbar-color: #444 transparent;
+  
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  
+  /* Optimización para scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar personalizada más elegante */
+.sidebarContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebarContent::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb:active {
+  background: #666;
+}
+
+/* En modo colapsado, ocultar scrollbar para mejor apariencia */
+.collapsed .sidebarContent::-webkit-scrollbar {
+  width: 2px;
+}
+
+.collapsed .sidebarContent::-webkit-scrollbar-thumb {
+  background: #333;
+}
+
+/* Fade effect en los bordes superior e inferior cuando hay scroll */
+.sidebarContent::before,
+.sidebarContent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+.sidebarContent::before {
+  top: 0;
+  background: linear-gradient(to bottom, #1a1a1a, transparent);
+  opacity: 0;
+}
+
+.sidebarContent::after {
+  bottom: 0;
+  background: linear-gradient(to top, #1a1a1a, transparent);
+  opacity: 0;
+}
+
+/* Mostrar fade effects cuando hay scroll (se puede controlar con JS) */
+.sidebarContent.hasScrollTop::before {
+  opacity: 1;
+}
+
+.sidebarContent.hasScrollBottom::after {
+  opacity: 1;
+}
+
+/* Menú */
+.sidebarMenu {
+  padding: 0;
+  margin: 0;
+}
+
+.menuItem {
+  margin-bottom: 1px;
+}
+
+/* Elementos del sidebar */
+.sidebarItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 20px;
+  color: #e1e1e1;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+  border-radius: 0;
+  justify-content: flex-start;
+}
+
+.sidebarItem:hover {
+  background: #333;
+  color: white;
+}
+
+.sidebarItem.active {
+  background: #333;
+  color: white;
+  font-weight: 500;
+}
+
+/* En modo colapsado, centrar iconos */
+.collapsed .sidebarItem {
+  padding: 12px 20px;
+  justify-content: center;
+}
+
+.collapsed .sidebarItem:hover {
+  border-radius: 8px;
+  margin: 2px 8px;
+  width: calc(100% - 16px);
+}
+
+/* Iconos */
+.sidebarIcon {
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Texto */
+.sidebarText {
+  margin-left: 24px;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+/* Flecha */
+.sidebarArrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  margin-left: auto;
+}
+
+.sidebarArrow.rotated {
+  transform: rotate(180deg);
+}
+
+/* Submenús */
+.submenu {
+  background: #222;
+  border-left: 2px solid #444;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.submenu.show {
+  max-height: 500px;
+}
+
+/* Padding para niveles */
+.paddingLevel1 {
+  padding-left: 52px !important;
+}
+
+.paddingLevel2 {
+  padding-left: 76px !important;
+}
+
+/* Footer */
+.sidebarFooter {
+  padding: 16px 20px;
+  border-top: 1px solid #333;
+  margin-top: auto;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userAvatar {
+  flex-shrink: 0;
+}
+
+.avatarImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f0f0;
+}
+
+.userDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  display: block;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  display: block;
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Centrar footer en modo colapsado */
+.collapsed .userInfo {
+  justify-content: center;
+}
+
+/* Menú hamburguesa para móvil */
+.hamburger {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  background: #333;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hamburger:hover {
+  background: #444;
+  transform: scale(1.05);
+}
+
+.hamburger span {
+  width: 22px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+/* Overlay para móvil */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* Responsive breakpoints */
+
+/* Tablets y pantallas medianas (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar:not(.mobile) {
+    width: 72px;
+  }
+  
+  .sidebar:not(.mobile) .sidebarItem {
+    justify-content: center;
+    padding: 12px 20px;
+  }
+  
+  .sidebar:not(.mobile) .sidebarItem:hover {
+    border-radius: 8px;
+    margin: 2px 8px;
+    width: calc(100% - 16px);
+  }
+}
+
+/* Móviles (768px y menos) */
+@media (max-width: 768px) {
+  .sidebar:not(.mobileOpen) {
+    transform: translateX(-100%);
+  }
+  
+  .hamburger {
+    display: flex;
+  }
+}
+
+/* Desktop grande (más de 1024px) */
+@media (min-width: 1025px) {
+  .hamburger {
+    display: none;
+  }
+}
+
+/* Tooltips en modo colapsado */
+.collapsed .sidebarItem {
+  position: relative;
+}
+
+.collapsed .sidebarItem:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  padding: 8px 12px;
+  background: #444;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1002;
+  opacity: 0;
+  animation: fadeInTooltip 0.2s ease forwards;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.collapsed .sidebarItem:hover::before {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 2px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 6px 6px 0;
+  border-color: transparent #444 transparent transparent;
+  z-index: 1002;
+  opacity: 0;
+  animation: fadeInTooltip 0.2s ease forwards;
+}
+
+@keyframes fadeInTooltip {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animaciones suaves */
+.sidebar * {
+  transition: all 0.2s ease;
+}
+
+/* Ocultar elementos en modo colapsado */
+.collapsed .sidebarText,
+.collapsed .sidebarArrow,
+.collapsed .logoText,
+.collapsed .userDetails {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  margin: 0;
+}
+
+/* Estados de focus para accesibilidad */
+.sidebarItem:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: -2px;
+}
+
+.toggleButton:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
