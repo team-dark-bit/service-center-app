@@ -1,3 +1,5 @@
+/* Sidebar.module.css */
+
 /* Sidebar principal */
 .sidebar {
   position: fixed;
@@ -141,29 +143,88 @@
   transform: scale(1.05);
 }
 
-/* Contenido del sidebar */
+/* Contenido del sidebar con scroll inteligente */
 .sidebarContent {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 8px 0;
+  /* Solo mostrar scrollbar cuando hay contenido que lo requiera */
+  scrollbar-width: thin;
+  scrollbar-color: #444 transparent;
+  
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  
+  /* Optimización para scroll */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Scrollbar personalizada */
+/* Scrollbar personalizada más elegante */
 .sidebarContent::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .sidebarContent::-webkit-scrollbar-track {
   background: transparent;
+  border-radius: 3px;
 }
 
 .sidebarContent::-webkit-scrollbar-thumb {
   background: #444;
-  border-radius: 2px;
+  border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
 .sidebarContent::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.sidebarContent::-webkit-scrollbar-thumb:active {
+  background: #666;
+}
+
+/* En modo colapsado, ocultar scrollbar para mejor apariencia */
+.collapsed .sidebarContent::-webkit-scrollbar {
+  width: 2px;
+}
+
+.collapsed .sidebarContent::-webkit-scrollbar-thumb {
+  background: #333;
+}
+
+/* Fade effect en los bordes superior e inferior cuando hay scroll */
+.sidebarContent::before,
+.sidebarContent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+.sidebarContent::before {
+  top: 0;
+  background: linear-gradient(to bottom, #1a1a1a, transparent);
+  opacity: 0;
+}
+
+.sidebarContent::after {
+  bottom: 0;
+  background: linear-gradient(to top, #1a1a1a, transparent);
+  opacity: 0;
+}
+
+/* Mostrar fade effects cuando hay scroll (se puede controlar con JS) */
+.sidebarContent.hasScrollTop::before {
+  opacity: 1;
+}
+
+.sidebarContent.hasScrollBottom::after {
+  opacity: 1;
 }
 
 /* Menú */

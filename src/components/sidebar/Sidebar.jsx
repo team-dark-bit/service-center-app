@@ -1,5 +1,5 @@
 // Sidebar.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
@@ -7,6 +7,20 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [scrollState, setScrollState] = useState({ hasScrollTop: false, hasScrollBottom: false });
+  const sidebarContentRef = useRef(null);
+
+  // Función para manejar el estado del scroll
+  const handleScroll = () => {
+    const element = sidebarContentRef.current;
+    if (!element) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const hasScrollTop = scrollTop > 10;
+    const hasScrollBottom = scrollTop < scrollHeight - clientHeight - 10;
+
+    setScrollState({ hasScrollTop, hasScrollBottom });
+  };
 
   // Detectar cambios de tamaño de pantalla
   useEffect(() => {
@@ -31,6 +45,24 @@ const Sidebar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Configurar scroll listener
+  useEffect(() => {
+    const element = sidebarContentRef.current;
+    if (!element) return;
+
+    element.addEventListener('scroll', handleScroll);
+    // Verificar estado inicial del scroll
+    handleScroll();
+
+    return () => element.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Verificar scroll cuando cambia el contenido (menús expandidos)
+  useEffect(() => {
+    const timeout = setTimeout(handleScroll, 100);
+    return () => clearTimeout(timeout);
+  }, [activeMenus]);
 
   const toggleMenu = (menuId) => {
     // En modo colapsado, no mostrar submenús
@@ -58,6 +90,12 @@ const Sidebar = () => {
       href: '#home'
     },
     {
+      id: 'dashboard',
+      title: 'Dashboard',
+      icon: '📊',
+      href: '#dashboard'
+    },
+    {
       id: 'productos',
       title: 'Productos',
       icon: '📦',
@@ -68,14 +106,27 @@ const Sidebar = () => {
           href: '#catalogo',
           icon: '📋'
         },
+        { 
+          id: 'inventario', 
+          title: 'Inventario', 
+          href: '#inventario',
+          icon: '📚'
+        },
         {
           id: 'compras',
           title: 'Compras',
           icon: '🛒',
           subItems: [
-            { id: 'registrar', title: 'Registrar', href: '#registrar', icon: '➕' },
-            { id: 'listar', title: 'Listar', href: '#listar', icon: '📄' }
+            { id: 'registrar-compra', title: 'Registrar', href: '#registrar', icon: '➕' },
+            { id: 'listar-compras', title: 'Listar', href: '#listar', icon: '📄' },
+            { id: 'proveedores', title: 'Proveedores', href: '#proveedores', icon: '🏢' }
           ]
+        },
+        { 
+          id: 'categorias', 
+          title: 'Categorías', 
+          href: '#categorias',
+          icon: '🏷️'
         }
       ]
     },
@@ -91,10 +142,53 @@ const Sidebar = () => {
           icon: '🆕'
         },
         { 
-          id: 'historial', 
+          id: 'historial-ventas', 
           title: 'Historial', 
           href: '#historial',
           icon: '📊'
+        },
+        { 
+          id: 'clientes', 
+          title: 'Clientes', 
+          href: '#clientes',
+          icon: '👥'
+        },
+        { 
+          id: 'cotizaciones', 
+          title: 'Cotizaciones', 
+          href: '#cotizaciones',
+          icon: '📝'
+        }
+      ]
+    },
+    {
+      id: 'finanzas',
+      title: 'Finanzas',
+      icon: '💳',
+      subItems: [
+        { 
+          id: 'caja', 
+          title: 'Caja', 
+          href: '#caja',
+          icon: '💵'
+        },
+        { 
+          id: 'facturacion', 
+          title: 'Facturación', 
+          href: '#facturacion',
+          icon: '🧾'
+        },
+        { 
+          id: 'gastos', 
+          title: 'Gastos', 
+          href: '#gastos',
+          icon: '💸'
+        },
+        { 
+          id: 'impuestos', 
+          title: 'Impuestos', 
+          href: '#impuestos',
+          icon: '🏛️'
         }
       ]
     },
@@ -102,13 +196,126 @@ const Sidebar = () => {
       id: 'reportes',
       title: 'Reportes',
       icon: '📈',
-      href: '#reportes'
+      subItems: [
+        { 
+          id: 'ventas-reporte', 
+          title: 'Reporte de Ventas', 
+          href: '#reporte-ventas',
+          icon: '📊'
+        },
+        { 
+          id: 'inventario-reporte', 
+          title: 'Reporte de Inventario', 
+          href: '#reporte-inventario',
+          icon: '📋'
+        },
+        { 
+          id: 'financiero', 
+          title: 'Estado Financiero', 
+          href: '#estado-financiero',
+          icon: '💹'
+        }
+      ]
+    },
+    {
+      id: 'recursos-humanos',
+      title: 'Recursos Humanos',
+      icon: '👨‍💼',
+      subItems: [
+        { 
+          id: 'empleados', 
+          title: 'Empleados', 
+          href: '#empleados',
+          icon: '👥'
+        },
+        { 
+          id: 'nomina', 
+          title: 'Nómina', 
+          href: '#nomina',
+          icon: '💰'
+        },
+        { 
+          id: 'asistencia', 
+          title: 'Asistencia', 
+          href: '#asistencia',
+          icon: '📅'
+        }
+      ]
+    },
+    {
+      id: 'marketing',
+      title: 'Marketing',
+      icon: '📢',
+      subItems: [
+        { 
+          id: 'campanas', 
+          title: 'Campañas', 
+          href: '#campanas',
+          icon: '🎯'
+        },
+        { 
+          id: 'promociones', 
+          title: 'Promociones', 
+          href: '#promociones',
+          icon: '🎁'
+        }
+      ]
     },
     {
       id: 'configuracion',
       title: 'Configuración',
       icon: '⚙️',
-      href: '#configuracion'
+      subItems: [
+        { 
+          id: 'empresa', 
+          title: 'Datos de Empresa', 
+          href: '#empresa',
+          icon: '🏢'
+        },
+        { 
+          id: 'usuarios', 
+          title: 'Usuarios', 
+          href: '#usuarios',
+          icon: '👤'
+        },
+        { 
+          id: 'permisos', 
+          title: 'Permisos', 
+          href: '#permisos',
+          icon: '🔐'
+        },
+        { 
+          id: 'backup', 
+          title: 'Respaldo', 
+          href: '#backup',
+          icon: '💾'
+        }
+      ]
+    },
+    {
+      id: 'ayuda',
+      title: 'Ayuda',
+      icon: '❓',
+      subItems: [
+        { 
+          id: 'documentacion', 
+          title: 'Documentación', 
+          href: '#docs',
+          icon: '📖'
+        },
+        { 
+          id: 'soporte', 
+          title: 'Soporte Técnico', 
+          href: '#soporte',
+          icon: '🛠️'
+        },
+        { 
+          id: 'acerca', 
+          title: 'Acerca de', 
+          href: '#acerca',
+          icon: 'ℹ️'
+        }
+      ]
     }
   ];
 
@@ -167,6 +374,12 @@ const Sidebar = () => {
     ${isMobileOpen ? styles.mobileOpen : ''}
   `.trim();
 
+  const contentClasses = `
+    ${styles.sidebarContent}
+    ${scrollState.hasScrollTop ? styles.hasScrollTop : ''}
+    ${scrollState.hasScrollBottom ? styles.hasScrollBottom : ''}
+  `.trim();
+
   return (
     <>
       {/* Botón de menú hamburguesa para móvil */}
@@ -221,7 +434,7 @@ const Sidebar = () => {
         </div>
 
         {/* Navigation Menu */}
-        <div className={styles.sidebarContent}>
+        <div className={contentClasses} ref={sidebarContentRef}>
           <div className={styles.sidebarMenu}>
             {menuItems.map(item => renderMenuItem(item))}
           </div>
