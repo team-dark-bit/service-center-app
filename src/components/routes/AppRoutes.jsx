@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import CreateProduct from "../products/CreateProduct";
+import CreateProduct from "../products/CreateProduct/CreateProduct";
 
 
 export const AppRoutes = () => {
