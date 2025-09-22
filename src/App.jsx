@@ -1,10 +1,9 @@
-import { useState } from 'react'
+
 import './App.css'
 import Sidebar from './components/sidebar/Sidebar';
-import CreateProduct from './components/products/CreateProduct';
+import CreateProduct from './components/products/CreateProduct/CreateProduct';
 
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
     <>
