@@ -24,7 +24,8 @@ const productApi = {
   //getCategories: () => axiosConfig.get('/categories'),
 
   // Obtener subcategorías por categoría
-  getSubcategories: (categoryId) => axiosConfig.get(`/categories/${categoryId}/subcategories`)
+  getSubcategories: (categoryId) => axiosConfig.get(`/categories/${categoryId}/subcategories`).then((res) => res.data.data),
+
 };
 
 export default productApi;
