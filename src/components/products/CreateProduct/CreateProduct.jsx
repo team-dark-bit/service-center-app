@@ -8,7 +8,7 @@ const CreateProduct = () => {
 
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
-  //const [subcategories, setSubcategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -39,31 +39,23 @@ const CreateProduct = () => {
     fetchBrands();
   }, []);
   
-  
-
-  // Subcategorías que cambian según la categoría seleccionada
-  const getSubcategories = (categoryId) => {
-    const subcategoriesMap = {
-      1: [ // DISCOS
-        { id: 1, name: 'FRENO DE DISCO XR' },
-        { id: 2, name: 'FRENO DE DISCO PULSAR' },
-      ],
-      2: [ // LUBRICANTES
-        { id: 3, name: 'ACEITE MOTOR 20W50' },
-        { id: 4, name: 'ACEITE MOTOR 15W40' },
-      ],
-      3: [ // FILTROS
-        { id: 5, name: 'FILTRO DE AIRE' },
-        { id: 6, name: 'FILTRO DE ACEITE' },
-      ],
-      4: [ // OTROS
-        { id: 7, name: 'ACCESORIOS VARIOS' },
-      ]
-    };
-    return subcategoriesMap[categoryId] || [];
+  useEffect(() => {
+  const fetchSubcategories = async () => {
+    if (!formData.categoryId) {
+      setSubcategories([]);
+      return;
+    }
+    try {
+      const subs = await productApi.getSubcategories(formData.categoryId);
+      setSubcategories(subs);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      setSubcategories([]);
+    }
   };
 
-  const subcategories = getSubcategories(parseInt(formData.categoryId));
+  fetchSubcategories();
+  }, [formData.categoryId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
