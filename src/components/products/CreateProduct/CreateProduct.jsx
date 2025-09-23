@@ -7,7 +7,7 @@ import styles from './CreateProduct.module.css';
 const CreateProduct = () => {
 
   const [brands, setBrands] = useState([]);
-  //const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]);
   //const [subcategories, setSubcategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,6 +28,8 @@ const CreateProduct = () => {
       try { 
         const brands = await productApi.getBrands();
         setBrands(brands);
+        const categories = await productApi.getCategories();
+        setCategories(categories);
       } catch (error) {
         console.error('Error fetching brands:', error);
         setBrands([]);
@@ -36,13 +38,8 @@ const CreateProduct = () => {
 
     fetchBrands();
   }, []);
-
-  const categories = [
-    { id: 1, name: 'DISCOS' },
-    { id: 2, name: 'LUBRICANTES' },
-    { id: 3, name: 'FILTROS' },
-    { id: 4, name: 'OTROS' },
-  ];
+  
+  
 
   // Subcategorías que cambian según la categoría seleccionada
   const getSubcategories = (categoryId) => {
