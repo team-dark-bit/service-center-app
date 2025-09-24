@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import productApi from "@/api/productApi";
 import styles from "./CreateProduct.module.css";
 import { getTodayDate } from "@/utils/date-utils";
+import { useDateTimePicker } from '@/hooks/useDateTimePicker';
 
 const CreateProduct = () => {
   const [brands, setBrands] = useState([]);
@@ -19,16 +20,27 @@ const CreateProduct = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    alias: "",
+    displayName: "",
     description: "",
     brandId: "",
     categoryId: "",
     subcategoryId: "",
+    serviceCenterId: "",
     sku: "",
     barcode: "",
-    activationDate: getTodayDate(),
-    isActive: true,
+    unitId: "",
+    packageId: "",
+    imageUrl: "",
+    activeFrom: getTodayDate(),
+    status: true,
+    quantity: 0,
   });
+
+  const { 
+    dateInput, 
+    handleDateChange, 
+    fullDate 
+  } = useDateTimePicker(new Date());
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -89,7 +101,6 @@ const CreateProduct = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-      // Resetear subcategoría cuando cambie la categoría
       ...(name === "categoryId" ? { subcategoryId: "" } : {}),
     }));
   };
@@ -119,15 +130,13 @@ const CreateProduct = () => {
       const productData = {
         ...formData,
         imageUrl: imageUrl, // Add the image URL to the data
+        activeFrom: fullDate.toISOString(),
       };
 
       console.log("📦 Datos del producto a enviar:", productData);
 
       // Step 3: Send the full data to your backend API
-      // await productApi.create(productData);
-
-      // Simulate the API call for now
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await productApi.create(productData);
 
       // Show success message
       Swal.fire({
@@ -149,8 +158,8 @@ const CreateProduct = () => {
         subcategoryId: "",
         sku: "",
         barcode: "",
-        activationDate: "",
-        isActive: true,
+        activeFrom: "",
+        status: true,
       });
       setImageFile(null); // Reset image file state
       setImagePreviewUrl(null); // Clear the image preview
@@ -215,8 +224,8 @@ const CreateProduct = () => {
                 <label className={styles.label}>Alias</label>
                 <input
                   type="text"
-                  name="alias"
-                  value={formData.alias}
+                  name="displayName"
+                  value={formData.displayName}
                   onChange={handleChange}
                   className={styles.input}
                   placeholder="Nombre alternativo del producto"
@@ -376,9 +385,9 @@ const CreateProduct = () => {
                 <label className={styles.label}>Fecha de Activación</label>
                 <input
                   type="date"
-                  name="activationDate"
-                  value={formData.activationDate}
-                  onChange={handleChange}
+                  name="activeFrom"
+                  value={dateInput} // Usa el valor del hook
+                  onChange={handleDateChange} // Usa el manejador del hook
                   className={styles.input}
                 />
               </div>
@@ -388,8 +397,8 @@ const CreateProduct = () => {
                   <label className={styles.checkboxLabel}>
                     <input
                       type="checkbox"
-                      name="isActive"
-                      checked={formData.isActive}
+                      name="status"
+                      checked={formData.status}
                       onChange={handleChange}
                       className={styles.checkbox}
                     />
