@@ -21,10 +21,15 @@ const productApi = {
 
   // Obtener categorías (para los selects)
   getCategories: () => axiosConfig.get('/categories').then((res) => res.data.data),
-  //getCategories: () => axiosConfig.get('/categories'),
 
   // Obtener subcategorías por categoría
   getSubcategories: (categoryId) => axiosConfig.get(`/categories/${categoryId}/subcategories`).then((res) => res.data.data),
+
+  // Obtener Packages (para los selects)
+  getPackages: () => axiosConfig.get('/brands').then((res) => res.data.data),
+
+  // Obtener Units (para los selects)
+  getUnits: () => axiosConfig.get('/brands').then((res) => res.data.data),
 
 };
 

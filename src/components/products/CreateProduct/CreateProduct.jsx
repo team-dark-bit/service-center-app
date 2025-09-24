@@ -1,137 +1,190 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { storage } from "@/firebase/firebase-config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-import Swal from 'sweetalert2';
-import productApi from '../../../api/productApi';
-import styles from './CreateProduct.module.css';
+import Swal from "sweetalert2";
+import productApi from "@/api/productApi";
+import styles from "./CreateProduct.module.css";
+import { getTodayDate } from "@/utils/date-utils";
+import { useDateTimePicker } from '@/hooks/useDateTimePicker';
 
 const CreateProduct = () => {
-
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+  const [packages, setPackages] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+
   const [formData, setFormData] = useState({
-    name: '',
-    alias: '',
-    description: '',
-    brandId: '',
-    categoryId: '',
-    subcategoryId: '',
-    sku: '',
-    barcode: '',
-    activationDate: '',
-    isActive: true
+    name: "",
+    displayName: "",
+    description: "",
+    brandId: "",
+    categoryId: "",
+    subcategoryId: "",
+    serviceCenterId: "",
+    sku: "",
+    barcode: "",
+    unitId: "",
+    packageId: "",
+    imageUrl: "",
+    activeFrom: getTodayDate(),
+    status: true,
+    quantity: 0,
   });
 
+  const { 
+    dateInput, 
+    handleDateChange, 
+    fullDate 
+  } = useDateTimePicker(new Date());
+
   useEffect(() => {
-    const fetchBrands = async () => {
-      try { 
-        const brands = await productApi.getBrands();
-        setBrands(brands);
-        const categories = await productApi.getCategories();
-        setCategories(categories);
+    const fetchInitialData = async () => {
+      try {
+        // Ejecutar todas las peticiones en paralelo para mayor eficiencia
+        const [brandsData, categoriesData, packagesData, unitsData] =
+          await Promise.all([
+            productApi.getBrands(),
+            productApi.getCategories(),
+            productApi.getPackages(),
+            productApi.getUnits(), 
+          ]);
+
+        // Actualizar los estados con los datos recibidos
+        setBrands(brandsData);
+        setCategories(categoriesData);
+        setPackages(packagesData); 
+        setUnits(unitsData); 
       } catch (error) {
-        console.error('Error fetching brands:', error);
+        console.error("Error fetching initial data:", error);
         setBrands([]);
-      } 
+        setCategories([]);
+        setPackages([]);
+        setUnits([]);
+      }
     };
 
-    fetchBrands();
+    fetchInitialData();
   }, []);
-  
+
   useEffect(() => {
-  const fetchSubcategories = async () => {
-    if (!formData.categoryId) {
-      setSubcategories([]);
-      return;
-    }
-    try {
-      const subs = await productApi.getSubcategories(formData.categoryId);
-      setSubcategories(subs);
-    } catch (error) {
-      console.error('Error fetching subcategories:', error);
-      setSubcategories([]);
+    const fetchSubcategories = async () => {
+      if (!formData.categoryId) {
+        setSubcategories([]);
+        return;
+      }
+      try {
+        const subs = await productApi.getSubcategories(formData.categoryId);
+        setSubcategories(subs);
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        setSubcategories([]);
+      }
+    };
+    fetchSubcategories();
+  }, [formData.categoryId]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreviewUrl(URL.createObjectURL(file)); // Create a local URL for the preview
     }
   };
 
-  fetchSubcategories();
-  }, [formData.categoryId]);
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-      // Resetear subcategoría cuando cambie la categoría
-      ...(name === 'categoryId' ? { subcategoryId: '' } : {})
+      [name]: type === "checkbox" ? checked : value,
+      ...(name === "categoryId" ? { subcategoryId: "" } : {}),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validación básica
+
     if (!formData.name.trim()) {
-      Swal.fire('Error', 'El nombre del producto es requerido', 'error');
+      Swal.fire("Error", "El nombre del producto es requerido", "error");
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      
-      console.log('📦 Datos del producto a enviar:', formData);
-      
-      // TODO: Descomenta esto cuando el backend esté listo
-      // await productApi.create(formData);
-      
-      // Por ahora simulamos una petición exitosa
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simular loading
-      
+      let imageUrl = "";
+
+      // Step 1: Upload the image to Firebase Storage
+      if (imageFile) {
+        const storageRef = ref(storage, `imagenes_productos/${imageFile.name}`);
+        await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(storageRef);
+        console.log("URL de descarga de la imagen:", imageUrl);
+      }
+
+      // Step 2: Prepare the final data object, including the image URL
+      const productData = {
+        ...formData,
+        imageUrl: imageUrl, // Add the image URL to the data
+        activeFrom: fullDate.toISOString(),
+      };
+
+      console.log("📦 Datos del producto a enviar:", productData);
+
+      // Step 3: Send the full data to your backend API
+      await productApi.create(productData);
+
+      // Show success message
       Swal.fire({
-        title: '¡Éxito!',
-        text: 'Producto registrado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Continuar'
+        title: "¡Éxito!",
+        text: "Producto registrado correctamente",
+        icon: "success",
+        confirmButtonText: "Continuar",
       }).then(() => {
-        // navigate('/products/list'); // Cuando tengas la ruta lista
+        // navigate('/products/list');
       });
 
-      // Reset form
+      // Step 4: Reset the form and image states
       setFormData({
-        name: '',
-        alias: '',
-        description: '',
-        brandId: '',
-        categoryId: '',
-        subcategoryId: '',
-        sku: '',
-        barcode: '',
-        activationDate: '',
-        isActive: true
+        name: "",
+        alias: "",
+        description: "",
+        brandId: "",
+        categoryId: "",
+        subcategoryId: "",
+        sku: "",
+        barcode: "",
+        activeFrom: "",
+        status: true,
       });
-
+      setImageFile(null); // Reset image file state
+      setImagePreviewUrl(null); // Clear the image preview
     } catch (error) {
-      console.error('Error creating product:', error);
-      Swal.fire('Error', 'Error al registrar producto', 'error');
+      console.error("Error al registrar producto:", error);
+      Swal.fire("Error", "Error al registrar producto", "error");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Stop the loading state
     }
   };
 
   const handleCancel = () => {
     Swal.fire({
-      title: '¿Está seguro?',
-      text: 'Se perderán todos los datos ingresados',
-      icon: 'question',
+      title: "¿Está seguro?",
+      text: "Se perderán todos los datos ingresados",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sí, cancelar',
-      cancelButtonText: 'No, continuar'
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "No, continuar",
     }).then((result) => {
       if (result.isConfirmed) {
         // navigate('/products/list'); // Cuando tengas la ruta
-        console.log('Formulario cancelado');
+        console.log("Formulario cancelado");
       }
     });
   };
@@ -140,16 +193,17 @@ const CreateProduct = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Crear Producto</h1>
-        <p className={styles.subtitle}>Complete la información del nuevo producto</p>
+        <p className={styles.subtitle}>
+          Complete la información del nuevo producto
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGrid}>
-          
           {/* Información Básica */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Información Básica</h3>
-            
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>
@@ -170,8 +224,8 @@ const CreateProduct = () => {
                 <label className={styles.label}>Alias</label>
                 <input
                   type="text"
-                  name="alias"
-                  value={formData.alias}
+                  name="displayName"
+                  value={formData.displayName}
                   onChange={handleChange}
                   className={styles.input}
                   placeholder="Nombre alternativo del producto"
@@ -197,7 +251,7 @@ const CreateProduct = () => {
           {/* Clasificación */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Clasificación</h3>
-            
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Marca</label>
@@ -208,7 +262,7 @@ const CreateProduct = () => {
                   className={styles.select}
                 >
                   <option value="">Seleccione una marca</option>
-                  {brands.map(brand => (
+                  {brands.map((brand) => (
                     <option key={brand.id} value={brand.id}>
                       {brand.name}
                     </option>
@@ -216,6 +270,25 @@ const CreateProduct = () => {
                 </select>
               </div>
 
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Unidad de Medida</label>
+                <select
+                  name="unitId"
+                  value={formData.unitId}
+                  onChange={handleChange}
+                  className={styles.select}
+                >
+                  <option value="">Seleccione unidad de medida</option>
+                  {units.map((unitItem) => (
+                    <option key={unitItem.id} value={unitItem.id}>
+                      {unitItem.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Categoría</label>
                 <select
@@ -225,16 +298,14 @@ const CreateProduct = () => {
                   className={styles.select}
                 >
                   <option value="">Seleccione una categoría</option>
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
                     </option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Subcategoría</label>
                 <select
@@ -245,9 +316,28 @@ const CreateProduct = () => {
                   disabled={!formData.categoryId}
                 >
                   <option value="">Seleccione una subcategoría</option>
-                  {subcategories.map(subcategory => (
+                  {subcategories.map((subcategory) => (
                     <option key={subcategory.id} value={subcategory.id}>
                       {subcategory.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Paquete</label>
+                <select
+                  name="packageId"
+                  value={formData.packageId}
+                  onChange={handleChange}
+                  className={styles.select}
+                >
+                  <option value="">Seleccione un paquete</option>
+                  {packages.map((packageItem) => (
+                    <option key={packageItem.id} value={packageItem.id}>
+                      {packageItem.name}
                     </option>
                   ))}
                 </select>
@@ -258,7 +348,7 @@ const CreateProduct = () => {
           {/* Códigos e Identificación */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Códigos e Identificación</h3>
-            
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>SKU</label>
@@ -289,15 +379,15 @@ const CreateProduct = () => {
           {/* Configuración */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Configuración</h3>
-            
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Fecha de Activación</label>
                 <input
                   type="date"
-                  name="activationDate"
-                  value={formData.activationDate}
-                  onChange={handleChange}
+                  name="activeFrom"
+                  value={dateInput} // Usa el valor del hook
+                  onChange={handleDateChange} // Usa el manejador del hook
                   className={styles.input}
                 />
               </div>
@@ -307,8 +397,8 @@ const CreateProduct = () => {
                   <label className={styles.checkboxLabel}>
                     <input
                       type="checkbox"
-                      name="isActive"
-                      checked={formData.isActive}
+                      name="status"
+                      checked={formData.status}
                       onChange={handleChange}
                       className={styles.checkbox}
                     />
@@ -317,6 +407,20 @@ const CreateProduct = () => {
                 </div>
               </div>
             </div>
+          </div>
+          {/* Opcion para subir imagen */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Imagen del Producto</label>
+            <input type="file" onChange={handleFileChange} />
+            {imagePreviewUrl && (
+              <div className={styles.imagePreview}>
+                <img
+                  src={imagePreviewUrl}
+                  alt="Vista previa del producto"
+                  className={styles.previewImage}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -330,7 +434,7 @@ const CreateProduct = () => {
           >
             Cancelar
           </button>
-          
+
           <button
             type="submit"
             className={styles.submitButton}
@@ -342,7 +446,7 @@ const CreateProduct = () => {
                 Guardando...
               </>
             ) : (
-              'Guardar Producto'
+              "Guardar Producto"
             )}
           </button>
         </div>

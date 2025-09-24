@@ -1,5 +1,5 @@
-// Sidebar.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
@@ -87,7 +87,7 @@ const Sidebar = () => {
       id: 'home',
       title: 'Inicio',
       icon: '🏠',
-      href: '#home'
+      href: '/'
     },
     {
       id: 'dashboard',
@@ -100,6 +100,12 @@ const Sidebar = () => {
       title: 'Productos',
       icon: '📦',
       subItems: [
+        {
+          id: 'crear-producto',
+          title: 'Crear Producto',
+          href: '/products/create',
+          icon: '➕'
+        },
         { 
           id: 'catalogo', 
           title: 'Catálogo', 
@@ -346,8 +352,8 @@ const Sidebar = () => {
             )}
           </button>
         ) : (
-          <a 
-            href={item.href || '#'} 
+          <Link 
+            to={item.href || '#'} 
             className={`${styles.sidebarItem} ${paddingClass}`}
             title={isCollapsed ? item.title : ''}
           >
@@ -355,7 +361,7 @@ const Sidebar = () => {
             {(!isCollapsed || isMobile) && (
               <span className={styles.sidebarText}>{item.title}</span>
             )}
-          </a>
+          </Link>
         )}
         
         {hasSubItems && showSubItems && (
