@@ -25,7 +25,7 @@ const CreateProduct = () => {
     brandId: "",
     categoryId: "",
     subcategoryId: "",
-    serviceCenterId: "",
+    serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
     sku: "",
     barcode: "",
     unitId: "",
@@ -34,6 +34,7 @@ const CreateProduct = () => {
     activeFrom: getTodayDate(),
     status: true,
     quantity: 0,
+    codedName: "",
   });
 
   const { 
@@ -156,6 +157,9 @@ const CreateProduct = () => {
         brandId: "",
         categoryId: "",
         subcategoryId: "",
+        quantity: 0,
+        unitId: "",
+        packageId: "",
         sku: "",
         barcode: "",
         activeFrom: "",
@@ -269,23 +273,6 @@ const CreateProduct = () => {
                   ))}
                 </select>
               </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Unidad de Medida</label>
-                <select
-                  name="unitId"
-                  value={formData.unitId}
-                  onChange={handleChange}
-                  className={styles.select}
-                >
-                  <option value="">Seleccione unidad de medida</option>
-                  {units.map((unitItem) => (
-                    <option key={unitItem.id} value={unitItem.id}>
-                      {unitItem.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
 
             <div className={styles.formRow}>
@@ -325,19 +312,46 @@ const CreateProduct = () => {
               </div>
             </div>
 
-            <div className={styles.formRow}>
+            <div className={styles.formRowThree}>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Paquete</label>
+                <label className={styles.label}>Presentación</label>
                 <select
                   name="packageId"
                   value={formData.packageId}
                   onChange={handleChange}
                   className={styles.select}
                 >
-                  <option value="">Seleccione un paquete</option>
+                  <option value="">Seleccione presentación</option>
                   {packages.map((packageItem) => (
                     <option key={packageItem.id} value={packageItem.id}>
                       {packageItem.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+               <div className={styles.formGroup}>
+                <label className={styles.label}>Valor</label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleChange}
+                  className={styles.input}
+                  placeholder="Valor"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Unidad de Medida</label>
+                <select
+                  name="unitId"
+                  value={formData.unitId}
+                  onChange={handleChange}
+                  className={styles.select}
+                >
+                  <option value="">Seleccione U. de medida</option>
+                  {units.map((unitItem) => (
+                    <option key={unitItem.id} value={unitItem.id}>
+                      {unitItem.code}
                     </option>
                   ))}
                 </select>

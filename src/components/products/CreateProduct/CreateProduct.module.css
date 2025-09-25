@@ -108,6 +108,14 @@
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
+  
+}
+
+.formRowThree {
+  display: flex;
+  gap: 1.5rem; /* Adjust the spacing between elements as needed */
+  align-items: flex-end; /* Align elements to the bottom, useful for multi-line inputs */
+  width: 100%;
 }
 
 .formRow:last-child {
