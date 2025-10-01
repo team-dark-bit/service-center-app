@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import CreateProduct from "../products/CreateProduct/CreateProduct";
+import CreatePurchase from "../purchases/CreatePurchase/CreatePurchase";
 
 
 export const AppRoutes = () => {
@@ -10,10 +11,10 @@ export const AppRoutes = () => {
                 path="products/create"
                 element={<CreateProduct />}
             />
-            {/* <Route
-                path="products/list"
-                element={<ListUser />}
-            /> */}
+            <Route
+                path="purchases/create"
+                element={<CreatePurchase />}
+            />
         </Routes>
     )
 }

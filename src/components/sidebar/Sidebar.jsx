@@ -123,7 +123,7 @@ const Sidebar = () => {
           title: 'Compras',
           icon: '🛒',
           subItems: [
-            { id: 'registrar-compra', title: 'Registrar', href: '#registrar', icon: '➕' },
+            { id: 'registrar-compra', title: 'Registrar', href: '/purchases/create', icon: '➕' },
             { id: 'listar-compras', title: 'Listar', href: '#listar', icon: '📄' },
             { id: 'proveedores', title: 'Proveedores', href: '#proveedores', icon: '🏢' }
           ]
