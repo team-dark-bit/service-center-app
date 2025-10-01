@@ -31,6 +31,14 @@ const productApi = {
   // Obtener Units (para los selects)
   getUnits: () => axiosConfig.get('/units').then((res) => res.data.data),
 
+
+  //nuevos endpoints
+   // Obtener Units (para los selects)
+  purchaseApi: () => axiosConfig.get('/units').then((res) => res.data.data),
+
+   // Obtener Units (para los selects)
+  productApi: () => axiosConfig.get('/units').then((res) => res.data.data),
+
 };
 
 export default productApi;
