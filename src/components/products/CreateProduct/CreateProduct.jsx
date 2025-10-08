@@ -14,27 +14,33 @@ const CreateProduct = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [packages, setPackages] = useState([]);
   const [units, setUnits] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
+  // Estado actualizado con la estructura de packages
   const [formData, setFormData] = useState({
+    brandId: "",
+    subcategoryId: "",
+    serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
     name: "",
     displayName: "",
     description: "",
-    brandId: "",
-    categoryId: "",
-    subcategoryId: "",
-    serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
-    sku: "",
-    barcode: "",
-    unitId: "",
-    packageId: "",
-    imageUrl: "",
     activeFrom: getTodayDate(),
-    status: true,
-    quantity: 0,
-    codedName: "",
+    status: true, // Producto activo
+    categoryId: "",
+    packages: [
+      {
+        sku: "",
+        barcode: "",
+        unitId: "",
+        packageId: "",
+        imageUrl: "",
+        activeFrom: getTodayDate(),
+        status: true, // Paquete activo
+        quantity: 1,
+        imageFile: null, // Archivo de imagen individual
+        imagePreviewUrl: null, // Vista previa individual
+      }
+    ],
   });
 
   const { 
@@ -46,7 +52,6 @@ const CreateProduct = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Ejecutar todas las peticiones en paralelo para mayor eficiencia
         const [brandsData, categoriesData, packagesData, unitsData] =
           await Promise.all([
             productApi.getBrands(),
@@ -55,7 +60,6 @@ const CreateProduct = () => {
             productApi.getUnits(), 
           ]);
 
-        // Actualizar los estados con los datos recibidos
         setBrands(brandsData);
         setCategories(categoriesData);
         setPackages(packagesData); 
@@ -89,12 +93,61 @@ const CreateProduct = () => {
     fetchSubcategories();
   }, [formData.categoryId]);
 
-  const handleFileChange = (e) => {
+  // Manejar cambios en los paquetes
+  const handlePackageChange = (index, field, value) => {
+    setFormData(prev => {
+      const updatedPackages = [...prev.packages];
+      updatedPackages[index][field] = value;
+      return { ...prev, packages: updatedPackages };
+    });
+  };
+
+  // Manejar cambio de archivo de imagen por paquete
+  const handlePackageImageChange = (index, e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file);
-      setImagePreviewUrl(URL.createObjectURL(file)); // Create a local URL for the preview
+      const updatedPackages = [...formData.packages];
+      updatedPackages[index].imageFile = file;
+      updatedPackages[index].imagePreviewUrl = URL.createObjectURL(file);
+      setFormData(prev => ({
+        ...prev,
+        packages: updatedPackages
+      }));
     }
+  };
+
+  // Agregar un nuevo paquete
+  const addPackage = () => {
+    setFormData(prev => ({
+      ...prev,
+      packages: [
+        ...prev.packages,
+        {
+          sku: "",
+          barcode: "",
+          unitId: "",
+          packageId: "",
+          imageUrl: "",
+          activeFrom: getTodayDate(),
+          status: true,
+          quantity: 1,
+          imageFile: null,
+          imagePreviewUrl: null,
+        }
+      ]
+    }));
+  };
+
+  // Eliminar un paquete
+  const removePackage = (index) => {
+    if (formData.packages.length === 1) {
+      Swal.fire("Advertencia", "Debe haber al menos un paquete", "warning");
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      packages: prev.packages.filter((_, i) => i !== index)
+    }));
   };
 
   const handleChange = (e) => {
@@ -117,29 +170,38 @@ const CreateProduct = () => {
     setIsLoading(true);
 
     try {
-      let imageUrl = "";
-
-      // Step 1: Upload the image to Firebase Storage
-      if (imageFile) {
-        const storageRef = ref(storage, `imagenes_productos/${imageFile.name}`);
-        await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(storageRef);
-        console.log("URL de descarga de la imagen:", imageUrl);
+      // Subir imágenes de cada paquete
+      const updatedPackages = [...formData.packages];
+      for (let i = 0; i < updatedPackages.length; i++) {
+        if (updatedPackages[i].imageFile) {
+          const storageRef = ref(storage, `imagenes_productos/${updatedPackages[i].imageFile.name}`);
+          await uploadBytes(storageRef, updatedPackages[i].imageFile);
+          const imageUrl = await getDownloadURL(storageRef);
+          updatedPackages[i].imageUrl = imageUrl;
+          console.log(`URL de descarga de la imagen para paquete ${i + 1}:`, imageUrl);
+        }
       }
 
-      // Step 2: Prepare the final data object, including the image URL
+      // Preparar el payload
       const productData = {
         ...formData,
-        imageUrl: imageUrl, // Add the image URL to the data
         activeFrom: fullDate.toISOString(),
+        packages: updatedPackages.map(pkg => ({
+          ...pkg,
+          activeFrom: new Date(pkg.activeFrom).toISOString(),
+          quantity: parseInt(pkg.quantity) || 1,
+          // Eliminar campos de imagen temporal antes de enviar
+          imageFile: undefined,
+          imagePreviewUrl: undefined,
+        }))
       };
 
       console.log("📦 Datos del producto a enviar:", productData);
 
-      // Step 3: Send the full data to your backend API
+      // Enviar a la API
       await productApi.create(productData);
 
-      // Show success message
+      // Mostrar éxito
       Swal.fire({
         title: "¡Éxito!",
         text: "Producto registrado correctamente",
@@ -149,29 +211,37 @@ const CreateProduct = () => {
         // navigate('/products/list');
       });
 
-      // Step 4: Reset the form and image states
+      // Resetear formulario
       setFormData({
-        name: "",
-        alias: "",
-        description: "",
         brandId: "",
-        categoryId: "",
         subcategoryId: "",
-        quantity: 0,
-        unitId: "",
-        packageId: "",
-        sku: "",
-        barcode: "",
-        activeFrom: "",
+        serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
+        name: "",
+        displayName: "",
+        description: "",
+        activeFrom: getTodayDate(),
         status: true,
+        categoryId: "",
+        packages: [
+          {
+            sku: "",
+            barcode: "",
+            unitId: "",
+            packageId: "",
+            imageUrl: "",
+            activeFrom: getTodayDate(),
+            status: true,
+            quantity: 1,
+            imageFile: null,
+            imagePreviewUrl: null,
+          }
+        ],
       });
-      setImageFile(null); // Reset image file state
-      setImagePreviewUrl(null); // Clear the image preview
     } catch (error) {
       console.error("Error al registrar producto:", error);
       Swal.fire("Error", "Error al registrar producto", "error");
     } finally {
-      setIsLoading(false); // Stop the loading state
+      setIsLoading(false);
     }
   };
 
@@ -187,7 +257,6 @@ const CreateProduct = () => {
       cancelButtonText: "No, continuar",
     }).then((result) => {
       if (result.isConfirmed) {
-        // navigate('/products/list'); // Cuando tengas la ruta
         console.log("Formulario cancelado");
       }
     });
@@ -311,83 +380,140 @@ const CreateProduct = () => {
                 </select>
               </div>
             </div>
-
-            <div className={styles.formRowThree}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Presentación</label>
-                <select
-                  name="packageId"
-                  value={formData.packageId}
-                  onChange={handleChange}
-                  className={styles.select}
-                >
-                  <option value="">Seleccione presentación</option>
-                  {packages.map((packageItem) => (
-                    <option key={packageItem.id} value={packageItem.id}>
-                      {packageItem.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-               <div className={styles.formGroup}>
-                <label className={styles.label}>Valor</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Valor"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Unidad de Medida</label>
-                <select
-                  name="unitId"
-                  value={formData.unitId}
-                  onChange={handleChange}
-                  className={styles.select}
-                >
-                  <option value="">Seleccione U. de medida</option>
-                  {units.map((unitItem) => (
-                    <option key={unitItem.id} value={unitItem.id}>
-                      {unitItem.code}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
           </div>
 
-          {/* Códigos e Identificación */}
+          {/* Paquetes */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Códigos e Identificación</h3>
+            <h3 className={styles.sectionTitle}>Paquetes</h3>
 
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>SKU</label>
-                <input
-                  type="text"
-                  name="sku"
-                  value={formData.sku}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Código SKU del producto"
-                />
-              </div>
+            {formData.packages.map((pkg, index) => (
+              <div key={index} className={styles.packageSection}>
+                <h4 className={styles.sectionTitle}>Paquete {index + 1}</h4>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Código de Barras</label>
-                <input
-                  type="text"
-                  name="barcode"
-                  value={formData.barcode}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Código de barras del producto"
-                />
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>SKU</label>
+                    <input
+                      type="text"
+                      value={pkg.sku}
+                      onChange={(e) => handlePackageChange(index, 'sku', e.target.value)}
+                      className={styles.input}
+                      placeholder="Código SKU del paquete"
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Código de Barras</label>
+                    <input
+                      type="text"
+                      value={pkg.barcode}
+                      onChange={(e) => handlePackageChange(index, 'barcode', e.target.value)}
+                      className={styles.input}
+                      placeholder="Código de barras del paquete"
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Presentación</label>
+                    <select
+                      value={pkg.packageId}
+                      onChange={(e) => handlePackageChange(index, 'packageId', e.target.value)}
+                      className={styles.select}
+                    >
+                      <option value="">Seleccione presentación</option>
+                      {packages.map((packageItem) => (
+                        <option key={packageItem.id} value={packageItem.id}>
+                          {packageItem.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Valor</label>
+                    <input
+                      type="number"
+                      value={pkg.quantity}
+                      onChange={(e) => handlePackageChange(index, 'quantity', e.target.value)}
+                      className={styles.input}
+                      placeholder="Valor"
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Unidad de Medida</label>
+                    <select
+                      value={pkg.unitId}
+                      onChange={(e) => handlePackageChange(index, 'unitId', e.target.value)}
+                      className={styles.select}
+                    >
+                      <option value="">Seleccione U. de medida</option>
+                      {units.map((unitItem) => (
+                        <option key={unitItem.id} value={unitItem.id}>
+                          {unitItem.code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <div className={styles.checkboxGroup}>
+                      <label className={styles.checkboxLabel}>
+                        <input
+                          type="checkbox"
+                          checked={pkg.status}
+                          onChange={(e) => handlePackageChange(index, 'status', e.target.checked)}
+                          className={styles.checkbox}
+                        />
+                        <span className={styles.checkboxText}>Paquete Activo</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <button
+                      type="button"
+                      onClick={() => removePackage(index)}
+                      className={styles.cancelButton}
+                      style={{ maxWidth: 'fit-content' }}
+                    >
+                      Eliminar Paquete
+                    </button>
+                  </div>
+                </div>
+
+                {/* Imagen por paquete */}
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Imagen del Paquete</label>
+                  <input 
+                    type="file" 
+                    onChange={(e) => handlePackageImageChange(index, e)} 
+                  />
+                  {pkg.imagePreviewUrl && (
+                    <div className={styles.imagePreview}>
+                      <img
+                        src={pkg.imagePreviewUrl}
+                        alt="Vista previa del paquete"
+                        className={styles.previewImage}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addPackage}
+              className={styles.submitButton}
+              style={{ maxWidth: 'fit-content', marginTop: '1rem' }}
+            >
+              + Agregar Paquete
+            </button>
           </div>
 
           {/* Configuración */}
@@ -400,8 +526,8 @@ const CreateProduct = () => {
                 <input
                   type="date"
                   name="activeFrom"
-                  value={dateInput} // Usa el valor del hook
-                  onChange={handleDateChange} // Usa el manejador del hook
+                  value={dateInput}
+                  onChange={handleDateChange}
                   className={styles.input}
                 />
               </div>
@@ -421,20 +547,6 @@ const CreateProduct = () => {
                 </div>
               </div>
             </div>
-          </div>
-          {/* Opcion para subir imagen */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Imagen del Producto</label>
-            <input type="file" onChange={handleFileChange} />
-            {imagePreviewUrl && (
-              <div className={styles.imagePreview}>
-                <img
-                  src={imagePreviewUrl}
-                  alt="Vista previa del producto"
-                  className={styles.previewImage}
-                />
-              </div>
-            )}
           </div>
         </div>
 
