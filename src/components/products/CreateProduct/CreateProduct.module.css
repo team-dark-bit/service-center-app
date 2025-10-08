@@ -360,3 +360,21 @@ input[type="file"] {
 input[type="file"]:hover {
   border-color: #888;
 }
+
+.packageSection {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8f9fa;
+}
+
+.packageSection:last-child {
+  margin-bottom: 0;
+}
+
+.packageSection h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #495057;
+}
