@@ -11,6 +11,8 @@ const CreatePurchase = () => {
     { id: "1", name: "Proveedor ABC" },
     { id: "2", name: "Distribuidora XYZ" },
     { id: "3", name: "Importadora Global" },
+    { id: "4", name: "Comercial Los Andes" },
+    { id: "5", name: "Distribuidora Nacional" },
   ];
 
   // Datos estáticos para tipos de comprobante
@@ -20,7 +22,7 @@ const CreatePurchase = () => {
     { id: "3", name: "Ticket" },
   ];
 
-  // Datos estáticos para productos (simula la respuesta del backend)
+  // Datos estáticos para productos
   const mockProducts = [
     { id: "1", name: "Laptop Dell XPS" },
     { id: "2", name: "Mouse Logitech G502" },
@@ -30,11 +32,15 @@ const CreatePurchase = () => {
     { id: "6", name: "Impresora HP Deskjet" },
   ];
 
-  const [providers] = useState(mockProviders);
   const [documentTypes] = useState(mockDocumentTypes);
-  const [allProducts] = useState(mockProducts); // Todos los productos
-  const [filteredProducts, setFilteredProducts] = useState([]); // Resultados de búsqueda
-  const [searchTerm, setSearchTerm] = useState(""); // Valor del input de búsqueda
+  const [allProducts] = useState(mockProducts);
+  const [allProviders] = useState(mockProviders);
+  
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filteredProviders, setFilteredProviders] = useState([]);
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [providerSearchTerm, setProviderSearchTerm] = useState("");
 
   const [purchaseItems, setPurchaseItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +53,32 @@ const CreatePurchase = () => {
     documentNumber: "",
   });
 
-  // Simula búsqueda de productos en el backend
+  // Búsqueda de proveedores
+  const handleProviderSearchChange = (e) => {
+    const value = e.target.value;
+    setProviderSearchTerm(value);
+    setFormData((prev) => ({ ...prev, providerId: "" }));
+
+    if (value.trim() === "") {
+      setFilteredProviders([]);
+      return;
+    }
+
+    const results = allProviders.filter((provider) =>
+      provider.name.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredProviders(results);
+  };
+
+  // Seleccionar proveedor
+  const handleSelectProvider = (provider) => {
+    setProviderSearchTerm(provider.name);
+    setFormData((prev) => ({ ...prev, providerId: provider.id }));
+    setFilteredProviders([]);
+  };
+
+  // Búsqueda de productos
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -57,7 +88,6 @@ const CreatePurchase = () => {
       return;
     }
 
-    // Simula búsqueda en el backend
     const results = allProducts.filter((product) =>
       product.name.toLowerCase().includes(value.toLowerCase())
     );
@@ -65,7 +95,7 @@ const CreatePurchase = () => {
     setFilteredProducts(results);
   };
 
-  // Selecciona un producto de la lista de búsqueda y lo agrega a la tabla
+  // Seleccionar producto
   const handleSelectProduct = (product) => {
     const newItem = {
       id: product.id,
@@ -77,16 +107,19 @@ const CreatePurchase = () => {
     };
 
     setPurchaseItems((prev) => [...prev, newItem]);
-
-    // Resetear input de búsqueda
     setSearchTerm("");
     setFilteredProducts([]);
   };
 
-  // Actualiza campos editables en la tabla
+  // Actualizar items con validación de negativos
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...purchaseItems];
-    updatedItems[index][field] = parseFloat(value) || 0;
+    const numValue = parseFloat(value) || 0;
+    
+    // Validar que no sea negativo
+    if (numValue < 0) return;
+    
+    updatedItems[index][field] = numValue;
 
     // Recalcular importe
     updatedItems[index].importe =
@@ -116,6 +149,11 @@ const CreatePurchase = () => {
       return;
     }
 
+    if (!formData.providerId) {
+      Swal.fire("Error", "Debe seleccionar un proveedor", "error");
+      return;
+    }
+
     setIsLoading(true);
 
     // Simulamos una API call
@@ -142,6 +180,7 @@ const CreatePurchase = () => {
       documentNumber: "",
     });
     setPurchaseItems([]);
+    setProviderSearchTerm("");
   };
 
   return (
@@ -174,19 +213,28 @@ const CreatePurchase = () => {
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Proveedor:</label>
-                <select
-                  name="providerId"
-                  value={formData.providerId}
-                  onChange={handleInputChange}
-                  className={styles.select}
-                >
-                  <option value="">Seleccione un proveedor</option>
-                  {providers.map((provider) => (
-                    <option key={provider.id} value={provider.id}>
-                      {provider.name}
-                    </option>
-                  ))}
-                </select>
+                <div className={styles.searchContainer}>
+                  <input
+                    type="text"
+                    value={providerSearchTerm}
+                    onChange={handleProviderSearchChange}
+                    className={styles.input}
+                    placeholder="Buscar proveedor..."
+                  />
+                  {filteredProviders.length > 0 && (
+                    <ul className={styles.dropdown}>
+                      {filteredProviders.map((provider) => (
+                        <li
+                          key={provider.id}
+                          onClick={() => handleSelectProvider(provider)}
+                          className={styles.dropdownItem}
+                        >
+                          {provider.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -267,79 +315,85 @@ const CreatePurchase = () => {
             </div>
 
             {/* Tabla de productos agregados */}
-            {purchaseItems.length > 0 && (
-              <>
-                <table className={styles.productsTable}>
-                  <thead>
-                    <tr>
-                      <th className={styles.nameCol}>Nombre</th>
-                      <th className={styles.quantityCol}>Cantidad</th>
-                      <th className={styles.priceCol}>P. Compra</th>
-                      <th className={styles.priceCol}>P. Venta</th>
-                      <th className={styles.totalCol}>Importe</th>
-                      <th className={styles.deleteCol}></th>
+            <table className={styles.productsTable}>
+              <thead>
+                <tr>
+                  <th className={styles.nameCol}>Nombre</th>
+                  <th className={styles.quantityCol}>Cantidad</th>
+                  <th className={styles.priceCol}>P. Compra</th>
+                  <th className={styles.priceCol}>P. Venta</th>
+                  <th className={styles.totalCol}>Importe</th>
+                  <th className={styles.deleteCol}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseItems.length > 0 ? (
+                  purchaseItems.map((item, index) => (
+                    <tr key={index}>
+                      <td>
+                        <span style={{ color: "#007bff" }}>{item.name}</span>
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleItemChange(index, "quantity", e.target.value)
+                          }
+                          className={styles.tableInput}
+                          min="1"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={item.purchasePrice}
+                          onChange={(e) =>
+                            handleItemChange(index, "purchasePrice", e.target.value)
+                          }
+                          className={styles.tableInput}
+                          min="0"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={item.salePrice}
+                          onChange={(e) =>
+                            handleItemChange(index, "salePrice", e.target.value)
+                          }
+                          className={styles.tableInput}
+                          min="0"
+                        />
+                      </td>
+                      <td>{item.importe.toFixed(2)}</td>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProduct(index)}
+                          className={styles.deleteButton}
+                        >
+                          ×
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {purchaseItems.map((item, index) => (
-                      <tr key={index}>
-                        <td>
-                          <span style={{ color: "#007bff" }}>{item.name}</span>
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              handleItemChange(index, "quantity", e.target.value)
-                            }
-                            className={styles.tableInput}
-                            min="1"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={item.purchasePrice}
-                            onChange={(e) =>
-                              handleItemChange(index, "purchasePrice", e.target.value)
-                            }
-                            className={styles.tableInput}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={item.salePrice}
-                            onChange={(e) =>
-                              handleItemChange(index, "salePrice", e.target.value)
-                            }
-                            className={styles.tableInput}
-                          />
-                        </td>
-                        <td>{item.importe.toFixed(2)}</td>
-                        <td>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveProduct(index)}
-                            className={styles.deleteButton}
-                          >
-                            ×
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center", padding: "2rem", color: "#6c757d" }}>
+                      No hay productos agregados. Busque y seleccione productos arriba.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
-                <div className={styles.totalContainer}>
-                  <span className={styles.totalLabel}>TOTAL COMPRA:</span>
-                  <span className={styles.totalAmount}>{calculateTotal()}</span>
-                </div>
-              </>
-            )}
+            <div className={styles.totalContainer}>
+              <span className={styles.totalLabel}>TOTAL COMPRA:</span>
+              <span className={styles.totalAmount}>{calculateTotal()}</span>
+            </div>
           </div>
         </div>
 
