@@ -231,7 +231,7 @@ const CreatePurchase = () => {
                   onChange={handleInputChange}
                   className={styles.select}
                 >
-                  <option value="">Seleccione tipo</option>
+                  <option value="">-- Seleccionar --</option>
                   {documentTypes.map((type) => (
                     <option key={type.id} value={type.id}>
                       {type.name}

@@ -224,15 +224,15 @@ const Sidebar = () => {
       ]
     },
     {
-      id: 'recursos-humanos',
-      title: 'Recursos Humanos',
+      id: 'proveedores',
+      title: 'Proveedores',
       icon: '👨‍💼',
       subItems: [
         { 
-          id: 'empleados', 
-          title: 'Empleados', 
-          href: '#empleados',
-          icon: '👥'
+          id: 'registrar-proveedor', 
+          title: 'Registrar Proveedor', 
+          href: '/suppliers/create',
+          icon: '➕'
         },
         { 
           id: 'nomina', 

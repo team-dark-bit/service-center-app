@@ -334,7 +334,7 @@ const CreateProduct = () => {
                   onChange={handleChange}
                   className={styles.select}
                 >
-                  <option value="">Seleccione una marca</option>
+                  <option value="">-- Seleccionar --</option>
                   {brands.map((brand) => (
                     <option key={brand.id} value={brand.id}>
                       {brand.name}
@@ -353,7 +353,7 @@ const CreateProduct = () => {
                   onChange={handleChange}
                   className={styles.select}
                 >
-                  <option value="">Seleccione una categoría</option>
+                  <option value="">-- Seleccionar --</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
@@ -371,7 +371,7 @@ const CreateProduct = () => {
                   className={styles.select}
                   disabled={!formData.categoryId}
                 >
-                  <option value="">Seleccione una subcategoría</option>
+                  <option value="">-- Seleccionar --</option>
                   {subcategories.map((subcategory) => (
                     <option key={subcategory.id} value={subcategory.id}>
                       {subcategory.name}
@@ -422,7 +422,7 @@ const CreateProduct = () => {
                       onChange={(e) => handlePackageChange(index, 'packageId', e.target.value)}
                       className={styles.select}
                     >
-                      <option value="">Seleccione presentación</option>
+                      <option value="">-- Seleccionar --</option>
                       {packages.map((packageItem) => (
                         <option key={packageItem.id} value={packageItem.id}>
                           {packageItem.name}
@@ -449,7 +449,7 @@ const CreateProduct = () => {
                       onChange={(e) => handlePackageChange(index, 'unitId', e.target.value)}
                       className={styles.select}
                     >
-                      <option value="">Seleccione U. de medida</option>
+                      <option value="">-- Seleccionar --</option>
                       {units.map((unitItem) => (
                         <option key={unitItem.id} value={unitItem.id}>
                           {unitItem.code}
