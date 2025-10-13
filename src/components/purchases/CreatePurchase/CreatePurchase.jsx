@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import styles from "./CreatePurchase.module.css";
 import { getTodayDate } from "@/utils/date-utils";
+import useProductSearch from "@/hooks/useProductSearch";
 
 const CreatePurchase = () => {
   // Datos estáticos para proveedores
@@ -22,25 +23,14 @@ const CreatePurchase = () => {
     { id: "3", name: "Ticket" },
   ];
 
-  // Datos estáticos para productos
-  const mockProducts = [
-    { id: "1", name: "Laptop Dell XPS" },
-    { id: "2", name: "Mouse Logitech G502" },
-    { id: "3", name: "Teclado Mecánico Razer" },
-    { id: "4", name: "Monitor Samsung 24\"" },
-    { id: "5", name: "SSD Kingston 500GB" },
-    { id: "6", name: "Impresora HP Deskjet" },
-  ];
-
   const [documentTypes] = useState(mockDocumentTypes);
-  const [allProducts] = useState(mockProducts);
   const [allProviders] = useState(mockProviders);
   
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [filteredProviders, setFilteredProviders] = useState([]);
-  
-  const [searchTerm, setSearchTerm] = useState("");
   const [providerSearchTerm, setProviderSearchTerm] = useState("");
+
+  // Hook personalizado para búsqueda de productos
+  const { searchTerm, setSearchTerm, filteredProducts, loading } = useProductSearch();
 
   const [purchaseItems, setPurchaseItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,23 +68,6 @@ const CreatePurchase = () => {
     setFilteredProviders([]);
   };
 
-  // Búsqueda de productos
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
-    if (value.trim() === "") {
-      setFilteredProducts([]);
-      return;
-    }
-
-    const results = allProducts.filter((product) =>
-      product.name.toLowerCase().includes(value.toLowerCase())
-    );
-
-    setFilteredProducts(results);
-  };
-
   // Seleccionar producto
   const handleSelectProduct = (product) => {
     const newItem = {
@@ -108,7 +81,6 @@ const CreatePurchase = () => {
 
     setPurchaseItems((prev) => [...prev, newItem]);
     setSearchTerm("");
-    setFilteredProducts([]);
   };
 
   // Actualizar items con validación de negativos
@@ -181,6 +153,7 @@ const CreatePurchase = () => {
     });
     setPurchaseItems([]);
     setProviderSearchTerm("");
+    setSearchTerm("");
   };
 
   return (
@@ -294,10 +267,11 @@ const CreatePurchase = () => {
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={handleSearchChange}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className={styles.input}
                   placeholder="Buscar producto..."
                 />
+                {loading && <span className={styles.loadingSpinner}></span>}
                 {filteredProducts.length > 0 && (
                   <ul className={styles.dropdown}>
                     {filteredProducts.map((product) => (
@@ -307,6 +281,7 @@ const CreatePurchase = () => {
                         className={styles.dropdownItem}
                       >
                         {product.name}
+                        {product.sku && <span> - SKU: {product.sku}</span>}
                       </li>
                     ))}
                   </ul>
