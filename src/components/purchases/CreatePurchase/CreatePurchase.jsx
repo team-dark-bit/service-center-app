@@ -1,21 +1,13 @@
 // src/components/purchases/CreatePurchase.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import styles from "./CreatePurchase.module.css";
 import { getTodayDate } from "@/utils/date-utils";
 import useProductSearch from "@/hooks/useProductSearch";
+import supplierApi from "@/api/supplierApi";
 
 const CreatePurchase = () => {
-  // Datos estáticos para proveedores
-  const mockProviders = [
-    { id: "1", name: "Proveedor ABC" },
-    { id: "2", name: "Distribuidora XYZ" },
-    { id: "3", name: "Importadora Global" },
-    { id: "4", name: "Comercial Los Andes" },
-    { id: "5", name: "Distribuidora Nacional" },
-  ];
-
   // Datos estáticos para tipos de comprobante
   const mockDocumentTypes = [
     { id: "1", name: "Factura" },
@@ -24,9 +16,8 @@ const CreatePurchase = () => {
   ];
 
   const [documentTypes] = useState(mockDocumentTypes);
-  const [allProviders] = useState(mockProviders);
-  
-  const [filteredProviders, setFilteredProviders] = useState([]);
+  const [allSuppliers, setAllSuppliers] = useState([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const [providerSearchTerm, setProviderSearchTerm] = useState("");
 
   // Hook personalizado para búsqueda de productos
@@ -43,6 +34,22 @@ const CreatePurchase = () => {
     documentNumber: "",
   });
 
+  // Cargar suppliers del backend al montar el componente
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const suppliers = await supplierApi.getAll();
+        setAllSuppliers(suppliers);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+        Swal.fire("Error", "No se pudieron cargar los proveedores", "error");
+        setAllSuppliers([]);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
+
   // Búsqueda de proveedores
   const handleProviderSearchChange = (e) => {
     const value = e.target.value;
@@ -50,22 +57,22 @@ const CreatePurchase = () => {
     setFormData((prev) => ({ ...prev, providerId: "" }));
 
     if (value.trim() === "") {
-      setFilteredProviders([]);
+      setFilteredSuppliers([]);
       return;
     }
 
-    const results = allProviders.filter((provider) =>
-      provider.name.toLowerCase().includes(value.toLowerCase())
+    const results = allSuppliers.filter((supplier) =>
+      supplier.name.toLowerCase().includes(value.toLowerCase())
     );
 
-    setFilteredProviders(results);
+    setFilteredSuppliers(results);
   };
 
   // Seleccionar proveedor
-  const handleSelectProvider = (provider) => {
-    setProviderSearchTerm(provider.name);
-    setFormData((prev) => ({ ...prev, providerId: provider.id }));
-    setFilteredProviders([]);
+  const handleSelectProvider = (supplier) => {
+    setProviderSearchTerm(supplier.name);
+    setFormData((prev) => ({ ...prev, providerId: supplier.id }));
+    setFilteredSuppliers([]);
   };
 
   // Seleccionar producto
@@ -194,15 +201,15 @@ const CreatePurchase = () => {
                     className={styles.input}
                     placeholder="Buscar proveedor..."
                   />
-                  {filteredProviders.length > 0 && (
+                  {filteredSuppliers.length > 0 && (
                     <ul className={styles.dropdown}>
-                      {filteredProviders.map((provider) => (
+                      {filteredSuppliers.map((supplier) => (
                         <li
-                          key={provider.id}
-                          onClick={() => handleSelectProvider(provider)}
+                          key={supplier.id}
+                          onClick={() => handleSelectProvider(supplier)}
                           className={styles.dropdownItem}
                         >
-                          {provider.name}
+                          {supplier.name}
                         </li>
                       ))}
                     </ul>

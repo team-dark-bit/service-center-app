@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import CreateProduct from "../products/CreateProduct/CreateProduct";
 import CreatePurchase from "../purchases/CreatePurchase/CreatePurchase";
 import CreateSupplier from "../suppliers/CreateSupplier/CreateSupplier";
+import ProductList from "../products/productList/ProductList";
 
 
 export const AppRoutes = () => {
@@ -20,6 +21,11 @@ export const AppRoutes = () => {
             <Route
                 path="suppliers/create"
                 element={<CreateSupplier />}
+            />
+
+            <Route
+                path="products/list-products"
+                element={<ProductList />}
             />
         </Routes>
     )

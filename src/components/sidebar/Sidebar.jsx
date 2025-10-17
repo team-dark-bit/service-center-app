@@ -113,9 +113,9 @@ const Sidebar = () => {
           icon: '📋'
         },
         { 
-          id: 'inventario', 
+          id: 'listar-productos', 
           title: 'Inventario', 
-          href: '#inventario',
+          href: '/products/list-products',
           icon: '📚'
         },
         {
