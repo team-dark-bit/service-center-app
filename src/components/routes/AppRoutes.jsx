@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import CreateProduct from "../products/CreateProduct/CreateProduct";
 import CreatePurchase from "../purchases/CreatePurchase/CreatePurchase";
 import CreateSupplier from "../suppliers/CreateSupplier/CreateSupplier";
-import ProductList from "../products/productList/ProductList";
+import ProductList from "../products/ProductList/ProductList";
 
 
 export const AppRoutes = () => {
