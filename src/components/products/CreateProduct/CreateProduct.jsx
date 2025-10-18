@@ -25,7 +25,7 @@ const CreateProduct = () => {
     displayName: "",
     description: "",
     activeFrom: getTodayDate(),
-    status: true, // Producto activo
+    status: true, 
     categoryId: "",
     packages: [
       {
@@ -35,10 +35,10 @@ const CreateProduct = () => {
         packageId: "",
         imageUrl: "",
         activeFrom: getTodayDate(),
-        status: true, // Paquete activo
+        status: true, 
         quantity: 1,
-        imageFile: null, // Archivo de imagen individual
-        imagePreviewUrl: null, // Vista previa individual
+        imageFile: null, 
+        imagePreviewUrl: null,
       }
     ],
   });
@@ -184,17 +184,31 @@ const CreateProduct = () => {
 
       // Preparar el payload
       const productData = {
-        ...formData,
-        activeFrom: fullDate.toISOString(),
-        packages: updatedPackages.map(pkg => ({
+      ...formData,
+      activeFrom: fullDate.toISOString(),
+      packages: updatedPackages.map(pkg => {
+
+        const selectedPackage = packages.find(p => p.id === pkg.packageId);
+        const packageCode = selectedPackage ? selectedPackage.code : '';
+
+
+        const selectedUnit = units.find(u => u.id === pkg.unitId);
+        const unitCode = selectedUnit ? selectedUnit.code : '';
+
+
+        const codedName = `${packageCode} ${pkg.quantity} ${unitCode}`;
+
+        return {
           ...pkg,
+          codedName: codedName, 
           activeFrom: new Date(pkg.activeFrom).toISOString(),
           quantity: parseInt(pkg.quantity) || 1,
-          // Eliminar campos de imagen temporal antes de enviar
+          
           imageFile: undefined,
           imagePreviewUrl: undefined,
-        }))
-      };
+        };
+      })
+    };
 
       console.log("📦 Datos del producto a enviar:", productData);
 
