@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { storage } from "@/firebase/firebase-config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
 import Swal from "sweetalert2";
 import productApi from "@/api/productApi";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
+import SearchSelect from "@/components/common/SearchSelect";
 import styles from "./CreateProduct.module.css";
 import { getTodayDate } from "@/utils/date-utils";
-import { useDateTimePicker } from '@/hooks/useDateTimePicker';
+import { useDateTimePicker } from "@/hooks/useDateTimePicker";
 
 const CreateProduct = () => {
   const [brands, setBrands] = useState([]);
@@ -16,7 +18,6 @@ const CreateProduct = () => {
   const [units, setUnits] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estado actualizado con la estructura de packages
   const [formData, setFormData] = useState({
     brandId: "",
     subcategoryId: "",
@@ -25,7 +26,7 @@ const CreateProduct = () => {
     displayName: "",
     description: "",
     activeFrom: getTodayDate(),
-    status: true, 
+    status: true,
     categoryId: "",
     packages: [
       {
@@ -35,19 +36,17 @@ const CreateProduct = () => {
         packageId: "",
         imageUrl: "",
         activeFrom: getTodayDate(),
-        status: true, 
+        status: true,
         quantity: 1,
-        imageFile: null, 
+        imageFile: null,
         imagePreviewUrl: null,
-      }
+      },
     ],
   });
 
-  const { 
-    dateInput, 
-    handleDateChange, 
-    fullDate 
-  } = useDateTimePicker(new Date());
+  const { dateInput, handleDateChange, fullDate } = useDateTimePicker(
+    new Date()
+  );
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -57,13 +56,13 @@ const CreateProduct = () => {
             productApi.getBrands(),
             productApi.getCategories(),
             productApi.getPackages(),
-            productApi.getUnits(), 
+            productApi.getUnits(),
           ]);
 
         setBrands(brandsData);
         setCategories(categoriesData);
-        setPackages(packagesData); 
-        setUnits(unitsData); 
+        setPackages(packagesData);
+        setUnits(unitsData);
       } catch (error) {
         console.error("Error fetching initial data:", error);
         setBrands([]);
@@ -93,32 +92,29 @@ const CreateProduct = () => {
     fetchSubcategories();
   }, [formData.categoryId]);
 
-  // Manejar cambios en los paquetes
   const handlePackageChange = (index, field, value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const updatedPackages = [...prev.packages];
       updatedPackages[index][field] = value;
       return { ...prev, packages: updatedPackages };
     });
   };
 
-  // Manejar cambio de archivo de imagen por paquete
   const handlePackageImageChange = (index, e) => {
     const file = e.target.files[0];
     if (file) {
       const updatedPackages = [...formData.packages];
       updatedPackages[index].imageFile = file;
       updatedPackages[index].imagePreviewUrl = URL.createObjectURL(file);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        packages: updatedPackages
+        packages: updatedPackages,
       }));
     }
   };
 
-  // Agregar un nuevo paquete
   const addPackage = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       packages: [
         ...prev.packages,
@@ -133,20 +129,19 @@ const CreateProduct = () => {
           quantity: 1,
           imageFile: null,
           imagePreviewUrl: null,
-        }
-      ]
+        },
+      ],
     }));
   };
 
-  // Eliminar un paquete
   const removePackage = (index) => {
     if (formData.packages.length === 1) {
       Swal.fire("Advertencia", "Debe haber al menos un paquete", "warning");
       return;
     }
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      packages: prev.packages.filter((_, i) => i !== index)
+      packages: prev.packages.filter((_, i) => i !== index),
     }));
   };
 
@@ -170,52 +165,50 @@ const CreateProduct = () => {
     setIsLoading(true);
 
     try {
-      // Subir imágenes de cada paquete
       const updatedPackages = [...formData.packages];
       for (let i = 0; i < updatedPackages.length; i++) {
         if (updatedPackages[i].imageFile) {
-          const storageRef = ref(storage, `imagenes_productos/${updatedPackages[i].imageFile.name}`);
+          const storageRef = ref(
+            storage,
+            `imagenes_productos/${updatedPackages[i].imageFile.name}`
+          );
           await uploadBytes(storageRef, updatedPackages[i].imageFile);
           const imageUrl = await getDownloadURL(storageRef);
           updatedPackages[i].imageUrl = imageUrl;
-          console.log(`URL de descarga de la imagen para paquete ${i + 1}:`, imageUrl);
+          console.log(
+            `URL de descarga de la imagen para paquete ${i + 1}:`,
+            imageUrl
+          );
         }
       }
 
-      // Preparar el payload
       const productData = {
-      ...formData,
-      activeFrom: fullDate.toISOString(),
-      packages: updatedPackages.map(pkg => {
+        ...formData,
+        activeFrom: fullDate.toISOString(),
+        packages: updatedPackages.map((pkg) => {
+          const selectedPackage = packages.find((p) => p.id === pkg.packageId);
+          const packageCode = selectedPackage ? selectedPackage.code : "";
 
-        const selectedPackage = packages.find(p => p.id === pkg.packageId);
-        const packageCode = selectedPackage ? selectedPackage.code : '';
+          const selectedUnit = units.find((u) => u.id === pkg.unitId);
+          const unitCode = selectedUnit ? selectedUnit.code : "";
 
+          const codedName = `${packageCode}${pkg.quantity}${unitCode}`;
 
-        const selectedUnit = units.find(u => u.id === pkg.unitId);
-        const unitCode = selectedUnit ? selectedUnit.code : '';
-
-
-        const codedName = `${packageCode} ${pkg.quantity} ${unitCode}`;
-
-        return {
-          ...pkg,
-          codedName: codedName, 
-          activeFrom: new Date(pkg.activeFrom).toISOString(),
-          quantity: parseInt(pkg.quantity) || 1,
-          
-          imageFile: undefined,
-          imagePreviewUrl: undefined,
-        };
-      })
-    };
+          return {
+            ...pkg,
+            codedName: codedName,
+            activeFrom: new Date(pkg.activeFrom).toISOString(),
+            quantity: parseInt(pkg.quantity) || 1,
+            imageFile: undefined,
+            imagePreviewUrl: undefined,
+          };
+        }),
+      };
 
       console.log("📦 Datos del producto a enviar:", productData);
 
-      // Enviar a la API
       await productApi.create(productData);
 
-      // Mostrar éxito
       Swal.fire({
         title: "¡Éxito!",
         text: "Producto registrado correctamente",
@@ -225,7 +218,6 @@ const CreateProduct = () => {
         // navigate('/products/list');
       });
 
-      // Resetear formulario
       setFormData({
         brandId: "",
         subcategoryId: "",
@@ -248,7 +240,7 @@ const CreateProduct = () => {
             quantity: 1,
             imageFile: null,
             imagePreviewUrl: null,
-          }
+          },
         ],
       });
     } catch (error) {
@@ -292,32 +284,22 @@ const CreateProduct = () => {
             <h3 className={styles.sectionTitle}>Información Básica</h3>
 
             <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Nombre <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Ingrese el nombre del producto"
-                  required
-                />
-              </div>
+              <Input
+                label="Nombre"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Ingrese el nombre del producto"
+                required
+              />
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Alias</label>
-                <input
-                  type="text"
-                  name="displayName"
-                  value={formData.displayName}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Nombre alternativo del producto"
-                />
-              </div>
+              <Input
+                label="Alias"
+                name="displayName"
+                value={formData.displayName}
+                onChange={handleChange}
+                placeholder="Nombre alternativo del producto"
+              />
             </div>
 
             <div className={styles.formRow}>
@@ -340,41 +322,25 @@ const CreateProduct = () => {
             <h3 className={styles.sectionTitle}>Clasificación</h3>
 
             <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Marca</label>
-                <select
-                  name="brandId"
-                  value={formData.brandId}
-                  onChange={handleChange}
-                  className={styles.select}
-                >
-                  <option value="">-- Seleccionar --</option>
-                  {brands.map((brand) => (
-                    <option key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SearchSelect
+                label="Marca"
+                name="brandId"
+                options={brands}
+                value={formData.brandId}
+                onChange={handleChange}
+                placeholder="Buscar marca..."
+              />
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Categoría</label>
-                <select
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleChange}
-                  className={styles.select}
-                >
-                  <option value="">-- Seleccionar --</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SearchSelect
+                label="Categoría"
+                name="categoryId"
+                options={categories}
+                value={formData.categoryId}
+                onChange={handleChange}
+                placeholder="Buscar categoría..."
+              />
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Subcategoría</label>
@@ -405,27 +371,23 @@ const CreateProduct = () => {
                 <h4 className={styles.sectionTitle}>Paquete {index + 1}</h4>
 
                 <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>SKU</label>
-                    <input
-                      type="text"
-                      value={pkg.sku}
-                      onChange={(e) => handlePackageChange(index, 'sku', e.target.value)}
-                      className={styles.input}
-                      placeholder="Código SKU del paquete"
-                    />
-                  </div>
+                  <Input
+                    label="SKU"
+                    value={pkg.sku}
+                    onChange={(e) =>
+                      handlePackageChange(index, "sku", e.target.value)
+                    }
+                    placeholder="Código SKU del paquete"
+                  />
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Código de Barras</label>
-                    <input
-                      type="text"
-                      value={pkg.barcode}
-                      onChange={(e) => handlePackageChange(index, 'barcode', e.target.value)}
-                      className={styles.input}
-                      placeholder="Código de barras del paquete"
-                    />
-                  </div>
+                  <Input
+                    label="Código de Barras"
+                    value={pkg.barcode}
+                    onChange={(e) =>
+                      handlePackageChange(index, "barcode", e.target.value)
+                    }
+                    placeholder="Código de barras del paquete"
+                  />
                 </div>
 
                 <div className={styles.formRow}>
@@ -433,7 +395,9 @@ const CreateProduct = () => {
                     <label className={styles.label}>Presentación</label>
                     <select
                       value={pkg.packageId}
-                      onChange={(e) => handlePackageChange(index, 'packageId', e.target.value)}
+                      onChange={(e) =>
+                        handlePackageChange(index, "packageId", e.target.value)
+                      }
                       className={styles.select}
                     >
                       <option value="">-- Seleccionar --</option>
@@ -445,22 +409,23 @@ const CreateProduct = () => {
                     </select>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Valor</label>
-                    <input
-                      type="number"
-                      value={pkg.quantity}
-                      onChange={(e) => handlePackageChange(index, 'quantity', e.target.value)}
-                      className={styles.input}
-                      placeholder="Valor"
-                    />
-                  </div>
+                  <Input
+                    label="Valor"
+                    type="number"
+                    value={pkg.quantity}
+                    onChange={(e) =>
+                      handlePackageChange(index, "quantity", e.target.value)
+                    }
+                    placeholder="Valor"
+                  />
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Unidad de Medida</label>
                     <select
                       value={pkg.unitId}
-                      onChange={(e) => handlePackageChange(index, 'unitId', e.target.value)}
+                      onChange={(e) =>
+                        handlePackageChange(index, "unitId", e.target.value)
+                      }
                       className={styles.select}
                     >
                       <option value="">-- Seleccionar --</option>
@@ -480,32 +445,29 @@ const CreateProduct = () => {
                         <input
                           type="checkbox"
                           checked={pkg.status}
-                          onChange={(e) => handlePackageChange(index, 'status', e.target.checked)}
+                          onChange={(e) =>
+                            handlePackageChange(
+                              index,
+                              "status",
+                              e.target.checked
+                            )
+                          }
                           className={styles.checkbox}
                         />
-                        <span className={styles.checkboxText}>Paquete Activo</span>
+                        <span className={styles.checkboxText}>
+                          Paquete Activo
+                        </span>
                       </label>
                     </div>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <button
-                      type="button"
-                      onClick={() => removePackage(index)}
-                      className={styles.cancelButton}
-                      style={{ maxWidth: 'fit-content' }}
-                    >
-                      Eliminar Paquete
-                    </button>
                   </div>
                 </div>
 
                 {/* Imagen por paquete */}
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Imagen del Paquete</label>
-                  <input 
-                    type="file" 
-                    onChange={(e) => handlePackageImageChange(index, e)} 
+                  <input
+                    type="file"
+                    onChange={(e) => handlePackageImageChange(index, e)}
                   />
                   {pkg.imagePreviewUrl && (
                     <div className={styles.imagePreview}>
@@ -517,17 +479,34 @@ const CreateProduct = () => {
                     </div>
                   )}
                 </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <button
+                      type="button"
+                      onClick={() => removePackage(index)}
+                      className={styles.cancelButton}
+                      style={{ maxWidth: "fit-content" }}
+                    >
+                      Eliminar Paquete
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
 
-            <button
+            <Button
               type="button"
               onClick={addPackage}
-              className={styles.submitButton}
-              style={{ maxWidth: 'fit-content', marginTop: '1rem' }}
+              variant="primary"
+              size="medium"
             >
               + Agregar Paquete
-            </button>
+            </Button>
           </div>
 
           {/* Configuración */}
@@ -566,29 +545,18 @@ const CreateProduct = () => {
 
         {/* Botones de Acción */}
         <div className={styles.actions}>
-          <button
+          <Button
             type="button"
             onClick={handleCancel}
-            className={styles.cancelButton}
+            variant="secondary"
             disabled={isLoading}
           >
             Cancelar
-          </button>
+          </Button>
 
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className={styles.buttonSpinner}></span>
-                Guardando...
-              </>
-            ) : (
-              "Guardar Producto"
-            )}
-          </button>
+          <Button type="submit" variant="primary" loading={isLoading}>
+            Guardar Producto
+          </Button>
         </div>
       </form>
     </div>
