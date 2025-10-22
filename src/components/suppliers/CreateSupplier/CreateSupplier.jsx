@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import supplierApi from "@/api/supplierApi";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
 import styles from "./CreateSupplier.module.css";
 
 const CreateSupplier = () => {
-  const { id } = useParams(); // Obtener ID de la URL si existe
+  const { id } = useParams();
   const navigate = useNavigate();
-  const isEditMode = Boolean(id); // Determinar si es modo edición
+  const isEditMode = Boolean(id);
 
   const documentTypes = [
     { id: "DNI", name: "DNI", maxLength: 8 },
@@ -27,7 +29,6 @@ const CreateSupplier = () => {
     active: true,
   });
 
-  // Cargar datos del supplier si es modo edición
   useEffect(() => {
     if (isEditMode) {
       loadSupplierData();
@@ -35,32 +36,28 @@ const CreateSupplier = () => {
   }, [id]);
 
   const loadSupplierData = async () => {
-  console.log("📞 Llamando a supplierApi.getById con ID:", id);
-  try {
-    setIsLoading(true);
-    const data = await supplierApi.getById(id);
-    console.log("✅ Datos recibidos:", data);
-    setFormData({
-      name: data.name || "",
-      documentType: data.documentType || "",
-      documentNumber: data.documentNumber || "",
-      description: data.description || "",
-      address: data.address || "",
-      phone: data.phone || "",
-      email: data.email || "",
-      active: data.active ?? true,
-    });
-    console.log("✅ FormData actualizado");
-  } catch (error) {
-    console.error("❌ Error loading supplier:", error);
-    Swal.fire("Error", "No se pudo cargar el proveedor", "error");
-    navigate("/suppliers");
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      setIsLoading(true);
+      const data = await supplierApi.getById(id);
+      setFormData({
+        name: data.name || "",
+        documentType: data.documentType || "",
+        documentNumber: data.documentNumber || "",
+        description: data.description || "",
+        address: data.address || "",
+        phone: data.phone || "",
+        email: data.email || "",
+        active: data.active ?? true,
+      });
+    } catch (error) {
+      console.error("Error loading supplier:", error);
+      Swal.fire("Error", "No se pudo cargar el proveedor", "error");
+      navigate("/suppliers");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Validar email
   const validateEmail = (email) => {
     if (email === "") return true;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -70,7 +67,6 @@ const CreateSupplier = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones
     if (!formData.name.trim()) {
       Swal.fire("Error", "El nombre del proveedor es requerido", "error");
       return;
@@ -86,7 +82,6 @@ const CreateSupplier = () => {
       return;
     }
 
-    // Validar longitud del documento
     if (formData.documentType === "DNI" && formData.documentNumber.length !== 8) {
       Swal.fire("Error", "El DNI debe tener exactamente 8 dígitos", "error");
       return;
@@ -102,7 +97,6 @@ const CreateSupplier = () => {
       return;
     }
 
-    // Validar email si se ingresó
     if (formData.email && !validateEmail(formData.email)) {
       Swal.fire("Error", "El formato del email no es válido", "error");
       return;
@@ -124,14 +118,12 @@ const CreateSupplier = () => {
 
       console.log("📦 Datos del proveedor a enviar:", supplierData);
 
-      // Enviar a la API (crear o actualizar)
       if (isEditMode) {
         await supplierApi.update(id, supplierData);
       } else {
         await supplierApi.create(supplierData);
       }
 
-      // Mostrar éxito
       Swal.fire({
         title: "¡Éxito!",
         text: isEditMode
@@ -173,14 +165,11 @@ const CreateSupplier = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Validación para número de documento
     if (name === "documentNumber") {
-      // Solo permitir números
       if (value && !/^\d*$/.test(value)) {
         return;
       }
 
-      // Validar longitud según tipo de documento
       if (formData.documentType) {
         const selectedType = documentTypes.find((t) => t.id === formData.documentType);
         if (selectedType && value.length > selectedType.maxLength) {
@@ -189,7 +178,6 @@ const CreateSupplier = () => {
       }
     }
 
-    // Validación para teléfono (solo números)
     if (name === "phone" && value && !/^\d*$/.test(value)) {
       return;
     }
@@ -200,7 +188,6 @@ const CreateSupplier = () => {
     }));
   };
 
-  // Obtener el maxLength dinámicamente
   const getDocumentMaxLength = () => {
     if (!formData.documentType) return undefined;
     const selectedType = documentTypes.find((t) => t.id === formData.documentType);
@@ -222,26 +209,19 @@ const CreateSupplier = () => {
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGrid}>
-          {/* Información Básica */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Información Básica</h3>
 
             {/* Nombre - Full width */}
             <div className={styles.formRowFull}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Nombre <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Ingrese el nombre del proveedor"
-                  required
-                />
-              </div>
+              <Input
+                label="Nombre"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Ingrese el nombre del proveedor"
+                required
+              />
             </div>
 
             {/* Tipo Documento y Número - Same row */}
@@ -266,73 +246,57 @@ const CreateSupplier = () => {
                 </select>
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Número de Documento <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="text"
-                  name="documentNumber"
-                  value={formData.documentNumber}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder={
-                    formData.documentType === "DNI"
-                      ? "8 dígitos"
-                      : formData.documentType === "RUC"
-                      ? "11 dígitos"
-                      : formData.documentType === "CEX"
-                      ? "Máx. 20 dígitos"
-                      : "Seleccione tipo primero"
-                  }
-                  maxLength={getDocumentMaxLength()}
-                  disabled={!formData.documentType}
-                  required
-                />
-              </div>
+              <Input
+                label="Número de Documento"
+                name="documentNumber"
+                value={formData.documentNumber}
+                onChange={handleChange}
+                placeholder={
+                  formData.documentType === "DNI"
+                    ? "8 dígitos"
+                    : formData.documentType === "RUC"
+                    ? "11 dígitos"
+                    : formData.documentType === "CEX"
+                    ? "Máx. 20 dígitos"
+                    : "Seleccione tipo primero"
+                }
+                maxLength={getDocumentMaxLength()}
+                disabled={!formData.documentType}
+                required
+              />
             </div>
 
             {/* Teléfono y Email - Same row */}
             <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Teléfono</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Ingrese el teléfono"
-                  maxLength={15}
-                />
-              </div>
+              <Input
+                label="Teléfono"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Ingrese el teléfono"
+                maxLength={15}
+              />
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="ejemplo@correo.com"
-                />
-              </div>
+              <Input
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="ejemplo@correo.com"
+              />
             </div>
 
             {/* Dirección - Full width */}
             <div className={styles.formRowFull}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Dirección</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Ingrese la dirección"
-                />
-              </div>
+              <Input
+                label="Dirección"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Ingrese la dirección"
+              />
             </div>
 
             {/* Descripción - Full width */}
@@ -367,29 +331,22 @@ const CreateSupplier = () => {
 
         {/* Botones de Acción */}
         <div className={styles.actions}>
-          <button
+          <Button
             type="button"
             onClick={handleCancel}
-            className={styles.cancelButton}
+            variant="secondary"
             disabled={isLoading}
           >
             Cancelar
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="submit"
-            className={styles.submitButton}
-            disabled={isLoading}
+            variant="primary"
+            loading={isLoading}
           >
-            {isLoading ? (
-              <>
-                <span className={styles.buttonSpinner}></span>
-                {isEditMode ? "Actualizando..." : "Guardando..."}
-              </>
-            ) : (
-              isEditMode ? "Actualizar Proveedor" : "Guardar Proveedor"
-            )}
-          </button>
+            {isEditMode ? "Actualizar Proveedor" : "Guardar Proveedor"}
+          </Button>
         </div>
       </form>
     </div>
