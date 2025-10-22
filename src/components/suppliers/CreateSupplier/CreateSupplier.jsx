@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import supplierApi from "@/api/supplierApi";
 import styles from "./CreateSupplier.module.css";
 
 const CreateSupplier = () => {
+  const { id } = useParams(); // Obtener ID de la URL si existe
+  const navigate = useNavigate();
+  const isEditMode = Boolean(id); // Determinar si es modo edición
+
   const documentTypes = [
     { id: "DNI", name: "DNI", maxLength: 8 },
     { id: "RUC", name: "RUC", maxLength: 11 },
@@ -21,6 +26,39 @@ const CreateSupplier = () => {
     email: "",
     active: true,
   });
+
+  // Cargar datos del supplier si es modo edición
+  useEffect(() => {
+    if (isEditMode) {
+      loadSupplierData();
+    }
+  }, [id]);
+
+  const loadSupplierData = async () => {
+  console.log("📞 Llamando a supplierApi.getById con ID:", id);
+  try {
+    setIsLoading(true);
+    const data = await supplierApi.getById(id);
+    console.log("✅ Datos recibidos:", data);
+    setFormData({
+      name: data.name || "",
+      documentType: data.documentType || "",
+      documentNumber: data.documentNumber || "",
+      description: data.description || "",
+      address: data.address || "",
+      phone: data.phone || "",
+      email: data.email || "",
+      active: data.active ?? true,
+    });
+    console.log("✅ FormData actualizado");
+  } catch (error) {
+    console.error("❌ Error loading supplier:", error);
+    Swal.fire("Error", "No se pudo cargar el proveedor", "error");
+    navigate("/suppliers");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Validar email
   const validateEmail = (email) => {
@@ -86,40 +124,33 @@ const CreateSupplier = () => {
 
       console.log("📦 Datos del proveedor a enviar:", supplierData);
 
-      // Enviar a la API
-      await supplierApi.create(supplierData);
+      // Enviar a la API (crear o actualizar)
+      if (isEditMode) {
+        await supplierApi.update(id, supplierData);
+      } else {
+        await supplierApi.create(supplierData);
+      }
 
       // Mostrar éxito
       Swal.fire({
         title: "¡Éxito!",
-        text: "Proveedor registrado correctamente",
+        text: isEditMode
+          ? "Proveedor actualizado correctamente"
+          : "Proveedor registrado correctamente",
         icon: "success",
         confirmButtonText: "Continuar",
       }).then(() => {
-        // navigate('/suppliers/list');
-        resetForm();
+        navigate("/suppliers");
       });
     } catch (error) {
-      console.error("Error al registrar proveedor:", error);
+      console.error("Error al registrar/actualizar proveedor:", error);
       const errorMessage =
-        error.response?.data?.message || "Error al registrar proveedor";
+        error.response?.data?.message ||
+        (isEditMode ? "Error al actualizar proveedor" : "Error al registrar proveedor");
       Swal.fire("Error", errorMessage, "error");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      documentType: "",
-      documentNumber: "",
-      description: "",
-      address: "",
-      phone: "",
-      email: "",
-      active: true,
-    });
   };
 
   const handleCancel = () => {
@@ -134,8 +165,7 @@ const CreateSupplier = () => {
       cancelButtonText: "No, continuar",
     }).then((result) => {
       if (result.isConfirmed) {
-        resetForm();
-        // navigate('/suppliers/list');
+        navigate("/suppliers");
       }
     });
   };
@@ -180,9 +210,13 @@ const CreateSupplier = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Crear Proveedor</h1>
+        <h1 className={styles.title}>
+          {isEditMode ? "Editar Proveedor" : "Crear Proveedor"}
+        </h1>
         <p className={styles.subtitle}>
-          Complete la información del nuevo proveedor
+          {isEditMode
+            ? "Modifique la información del proveedor"
+            : "Complete la información del nuevo proveedor"}
         </p>
       </div>
 
@@ -302,7 +336,7 @@ const CreateSupplier = () => {
             </div>
 
             {/* Descripción - Full width */}
-            <div className={styles.formRow}>
+            <div className={styles.formRowFull}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Descripción</label>
                 <textarea
@@ -350,10 +384,10 @@ const CreateSupplier = () => {
             {isLoading ? (
               <>
                 <span className={styles.buttonSpinner}></span>
-                Guardando...
+                {isEditMode ? "Actualizando..." : "Guardando..."}
               </>
             ) : (
-              "Guardar Proveedor"
+              isEditMode ? "Actualizar Proveedor" : "Guardar Proveedor"
             )}
           </button>
         </div>
