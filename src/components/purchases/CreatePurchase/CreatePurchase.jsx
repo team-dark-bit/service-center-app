@@ -6,6 +6,7 @@ import styles from "./CreatePurchase.module.css";
 import { getTodayDate } from "@/utils/date-utils";
 import useProductSearch from "@/hooks/useProductSearch";
 import supplierApi from "@/api/supplierApi";
+import SearchSelect from "@/components/common/SearchSelect";
 
 const CreatePurchase = () => {
   // Datos estáticos para tipos de comprobante
@@ -17,11 +18,11 @@ const CreatePurchase = () => {
 
   const [documentTypes] = useState(mockDocumentTypes);
   const [allSuppliers, setAllSuppliers] = useState([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const [providerSearchTerm, setProviderSearchTerm] = useState("");
 
   // Hook personalizado para búsqueda de productos
-  const { searchTerm, setSearchTerm, filteredProducts, loading } = useProductSearch();
+  const { searchTerm, setSearchTerm, filteredProducts, loading } =
+    useProductSearch();
 
   const [purchaseItems, setPurchaseItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,31 +51,6 @@ const CreatePurchase = () => {
     fetchSuppliers();
   }, []);
 
-  // Búsqueda de proveedores
-  const handleProviderSearchChange = (e) => {
-    const value = e.target.value;
-    setProviderSearchTerm(value);
-    setFormData((prev) => ({ ...prev, providerId: "" }));
-
-    if (value.trim() === "") {
-      setFilteredSuppliers([]);
-      return;
-    }
-
-    const results = allSuppliers.filter((supplier) =>
-      supplier.name.toLowerCase().includes(value.toLowerCase())
-    );
-
-    setFilteredSuppliers(results);
-  };
-
-  // Seleccionar proveedor
-  const handleSelectProvider = (supplier) => {
-    setProviderSearchTerm(supplier.name);
-    setFormData((prev) => ({ ...prev, providerId: supplier.id }));
-    setFilteredSuppliers([]);
-  };
-
   // Seleccionar producto
   const handleSelectProduct = (product) => {
     const newItem = {
@@ -94,10 +70,10 @@ const CreatePurchase = () => {
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...purchaseItems];
     const numValue = parseFloat(value) || 0;
-    
+
     // Validar que no sea negativo
     if (numValue < 0) return;
-    
+
     updatedItems[index][field] = numValue;
 
     // Recalcular importe
@@ -117,7 +93,9 @@ const CreatePurchase = () => {
   };
 
   const calculateTotal = () => {
-    return purchaseItems.reduce((sum, item) => sum + item.importe, 0).toFixed(2);
+    return purchaseItems
+      .reduce((sum, item) => sum + item.importe, 0)
+      .toFixed(2);
   };
 
   const handleSubmit = async (e) => {
@@ -191,31 +169,20 @@ const CreatePurchase = () => {
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Proveedor:</label>
-                <div className={styles.searchContainer}>
-                  <input
-                    type="text"
-                    value={providerSearchTerm}
-                    onChange={handleProviderSearchChange}
-                    className={styles.input}
-                    placeholder="Buscar proveedor..."
-                  />
-                  {filteredSuppliers.length > 0 && (
-                    <ul className={styles.dropdown}>
-                      {filteredSuppliers.map((supplier) => (
-                        <li
-                          key={supplier.id}
-                          onClick={() => handleSelectProvider(supplier)}
-                          className={styles.dropdownItem}
-                        >
-                          {supplier.name}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
+              <SearchSelect
+                label="Proveedor"
+                name="providerId"
+                options={allSuppliers}
+                value={formData.providerId}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    providerId: e.target.value,
+                  }))
+                }
+                placeholder="Buscar proveedor..."
+                required
+              />
             </div>
 
             <div className={styles.formRow}>
@@ -332,7 +299,11 @@ const CreatePurchase = () => {
                           step="0.1"
                           value={item.purchasePrice}
                           onChange={(e) =>
-                            handleItemChange(index, "purchasePrice", e.target.value)
+                            handleItemChange(
+                              index,
+                              "purchasePrice",
+                              e.target.value
+                            )
                           }
                           className={styles.tableInput}
                           min="0"
@@ -364,8 +335,16 @@ const CreatePurchase = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: "center", padding: "2rem", color: "#6c757d" }}>
-                      No hay productos agregados. Busque y seleccione productos arriba.
+                    <td
+                      colSpan="6"
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        color: "#6c757d",
+                      }}
+                    >
+                      No hay productos agregados. Busque y seleccione productos
+                      arriba.
                     </td>
                   </tr>
                 )}
