@@ -3,6 +3,7 @@ import CreateProduct from "../products/CreateProduct/CreateProduct";
 import CreatePurchase from "../purchases/CreatePurchase/CreatePurchase";
 import CreateSupplier from "../suppliers/CreateSupplier/CreateSupplier";
 import ProductList from "../products/ProductList/ProductList";
+import SupplierList from "../suppliers/SupplierList/SupplierList";
 
 
 export const AppRoutes = () => {
@@ -21,6 +22,16 @@ export const AppRoutes = () => {
             <Route
                 path="suppliers/create"
                 element={<CreateSupplier />}
+            />
+
+            <Route
+                path="suppliers/edit/:id"
+                element={<CreateSupplier />}
+            />
+
+            <Route
+                path="suppliers/list"
+                element={<SupplierList />}
             />
 
             <Route

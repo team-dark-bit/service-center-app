@@ -241,9 +241,9 @@ const Sidebar = () => {
           icon: '💰'
         },
         { 
-          id: 'asistencia', 
-          title: 'Asistencia', 
-          href: '#asistencia',
+          id: 'listar-proveedores', 
+          title: 'Listar Proveedores', 
+          href: '/suppliers/list',
           icon: '📅'
         }
       ]
