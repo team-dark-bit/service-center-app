@@ -1,0 +1,559 @@
+/* src/components/sales/CreateSale.module.css */
+
+.container {
+  margin-left: 280px;
+  padding: 1.5rem;
+  min-height: 100vh;
+  background: #f8f9fa;
+  transition: margin-left 0.3s ease, padding 0.3s ease;
+  width: calc(100% - 280px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    margin-left: 72px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+/* Header */
+.header {
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Barra de búsqueda global con dropdown */
+.searchSection {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.searchContainer {
+  position: relative;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  background: rgb(243, 244, 246);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background: white;
+}
+
+/* Dropdown de búsqueda */
+.searchDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f8f9fa;
+  position: relative;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: #f8f9fa;
+}
+
+.dropdownItemContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.dropdownItemImage {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.dropdownItemInfo {
+  flex: 1;
+}
+
+.dropdownItemName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 0.25rem 0;
+}
+
+.dropdownItemPrice {
+  font-size: 0.85rem;
+  color: #28a745;
+  font-weight: 600;
+  margin: 0;
+}
+
+.emptyDropdown {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+/* Tooltip de imagen grande en dropdown */
+.imageTooltip {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 1rem;
+  z-index: 1001;
+  background: white;
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.imageTooltip img {
+  width: 350px;
+  height: 350px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Layout Principal - MEJOR PROPORCIÓN 60/40 */
+.mainLayout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 1400px) {
+  .mainLayout {
+    grid-template-columns: 1.3fr 1fr;
+  }
+}
+
+@media (max-width: 1200px) {
+  .mainLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Columna Izquierda - Productos SELECCIONADOS */
+.leftColumn {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #007bff;
+}
+
+/* Grid de Productos SELECCIONADOS - CARDS MÁS GRANDES */
+/* Grid de Productos SELECCIONADOS - 3 COLUMNAS FIJAS */
+.selectedProductsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas fijas */
+  gap: 0.8rem;
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+/* Responsive: baja a 2 columnas en tablets */
+@media (max-width: 900px) {
+  .selectedProductsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive: baja a 1 columna en móviles */
+@media (max-width: 600px) {
+  .selectedProductsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards mejorados - inspirados en FormularioMisProductos */
+.selectedCard {
+  position: relative;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.selectedCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.removeCardButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.removeCardButton:hover {
+  background: #c82333;
+  transform: scale(1.15);
+}
+
+/* Contenedor de imagen mejorado */
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.selectedCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.selectedCard:hover .selectedCardImage {
+  transform: scale(1.1);
+}
+
+.selectedCardInfo {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.selectedCardName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  min-height: 2.8em;
+}
+
+.selectedCardPricePurchase {
+  font-size: 11px;
+  color: #0f0cb9;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.selectedCardStock {
+  font-size: 11px;
+  color: #ff7f00;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.selectedCardPriceSale {
+  font-size: 11px;
+  color: #28a745;
+  font-weight: bold;
+  margin: 4px 0 0 0;
+
+}
+
+/* Empty state de productos seleccionados */
+.emptySelectedMessage {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6c757d;
+}
+
+.emptySelectedMessage p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.emptyHint {
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
+/* Columna Derecha - Detalle de Venta - MÁS COMPACTA */
+.rightColumn {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.saleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.formTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 0.8rem 0;
+  text-align: center;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.formRow:has(.clientInputGroup) {
+  grid-template-columns: 1fr;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.select,
+.input {
+  padding: 0.6rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: rgb(243, 244, 246);
+}
+
+.select:focus,
+.input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.clientInputGroup {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.clientInputGroup .input {
+  flex: 1;
+}
+
+/* Tabla - MÁS COMPACTA */
+.productsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.8rem;
+}
+
+.productsTable th {
+  background: #f8f9fa;
+  padding: 0.6rem;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.8rem;
+  text-align: left;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.productsTable td {
+  padding: 0.2rem;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.7rem;
+}
+
+.productsTable tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.tableInput {
+  width: 44px;
+  padding: 0.4rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+.tableInput:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.deleteButton {
+  background: #dc3545;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.deleteButton:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+/* Total - MÁS COMPACTO */
+.totalContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  border: 2px solid #e9ecef;
+}
+
+.totalLabel {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.totalAmount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #28a745;
+}
+
+/* Modal */
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Empty States */
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 1.5rem;
+  color: #6c757d;
+}
+
+/* Scrollbar personalizado */
+.searchDropdown::-webkit-scrollbar,
+.selectedProductsGrid::-webkit-scrollbar,
+.rightColumn::-webkit-scrollbar {
+  width: 8px;
+}
+
+.searchDropdown::-webkit-scrollbar-track,
+.selectedProductsGrid::-webkit-scrollbar-track,
+.rightColumn::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.searchDropdown::-webkit-scrollbar-thumb,
+.selectedProductsGrid::-webkit-scrollbar-thumb,
+.rightColumn::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 8px;
+}
+
+.searchDropdown::-webkit-scrollbar-thumb:hover,
+.selectedProductsGrid::-webkit-scrollbar-thumb:hover,
+.rightColumn::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
