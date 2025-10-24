@@ -142,9 +142,9 @@ const Sidebar = () => {
       icon: '💰',
       subItems: [
         { 
-          id: 'nueva-venta', 
-          title: 'Nueva Venta', 
-          href: '#nueva-venta',
+          id: 'ventas', 
+          title: 'Registrar Venta', 
+          href: '/sales/create',
           icon: '🆕'
         },
         { 
