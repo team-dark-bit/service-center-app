@@ -4,6 +4,7 @@ import CreatePurchase from "../purchases/CreatePurchase/CreatePurchase";
 import CreateSupplier from "../suppliers/CreateSupplier/CreateSupplier";
 import ProductList from "../products/ProductList/ProductList";
 import SupplierList from "../suppliers/SupplierList/SupplierList";
+import CreateSale from "../sales/CreateSale/CreateSale";
 
 
 export const AppRoutes = () => {
@@ -37,6 +38,11 @@ export const AppRoutes = () => {
             <Route
                 path="products/list-products"
                 element={<ProductList />}
+            />
+
+            <Route
+                path="sales/create"
+                element={<CreateSale />}
             />
         </Routes>
     )
