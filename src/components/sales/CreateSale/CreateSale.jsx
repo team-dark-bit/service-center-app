@@ -6,6 +6,8 @@ import Modal from "@/components/common/Modal";
 import Select from "@/components/common/Select";
 import styles from "./CreateSale.module.css";
 import { getTodayDate } from "@/utils/date-utils";
+import customerApi from "@/api/customerApi";
+import SearchSelect from "@/components/common/SearchSelect";
 
 const CreateSale = () => {
   const documentTypes = [
@@ -18,6 +20,12 @@ const CreateSale = () => {
     { id: "1", name: "PAGO EFECTIVO" },
     { id: "2", name: "YAPE" },
     { id: "3", name: "PLIN" },
+  ];
+
+  const identityDocumentTypes = [
+    { id: "DNI", name: "DNI", maxLength: 8 },
+    { id: "RUC", name: "RUC", maxLength: 11 },
+    { id: "CEX", name: "CEX", maxLength: 20 },
   ];
 
   // Mock de productos
@@ -118,10 +126,12 @@ const CreateSale = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [allClients, setAllClients] = useState([]);
   const dropdownRef = useRef(null);
 
   const [formData, setFormData] = useState({
     documentType: "1",
+    clientId: "",
     saleNumber: "",
     clientName: "",
     clientDni: "",
@@ -131,9 +141,38 @@ const CreateSale = () => {
     saleDate: getTodayDate(),
   });
 
+  const [clientModalData, setClientModalData] = useState({
+    documentType: "DNI",
+    documentNumber: "",
+    fullName: "",
+    companyName: "",
+    phoneNumber: "",
+  });
+
+  const [clientModalErrors, setClientModalErrors] = useState({});
+
   const [saleItems, setSaleItems] = useState([]);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const clients = await customerApi.getAll();
+        const clientsWithDisplay = clients.map((client) => ({
+          ...client,
+          displayName: client.fullName || client.companyName || "Sin nombre",
+        }));
+        setAllClients(clientsWithDisplay);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+        Swal.fire("Error", "No se pudieron cargar los clientes", "error");
+        setAllClients([]);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -222,15 +261,168 @@ const CreateSale = () => {
     setIsClientModalOpen(true);
   };
 
-  const handleSaveClient = () => {
-    if (!formData.clientDni.trim() || !formData.clientName.trim()) {
-      Swal.fire("Error", "Complete DNI y Nombre del cliente", "error");
-      return;
-    }
-    setIsClientModalOpen(false);
-    Swal.fire("Éxito", "Cliente agregado correctamente", "success");
+  const getMaxLength = () => {
+    const docType = identityDocumentTypes.find(
+      (dt) => dt.id === clientModalData.documentType
+    );
+    return docType ? docType.maxLength : 20;
   };
 
+  const validateDocumentNumber = (type, number) => {
+    const numericOnly = /^\d+$/;
+
+    if (!number) return "El número de documento es requerido";
+    if (!numericOnly.test(number)) return "Solo se permiten números";
+
+    switch (type) {
+      case "DNI":
+        if (number.length !== 8) return "El DNI debe tener 8 dígitos";
+        break;
+      case "RUC":
+        if (number.length !== 11) return "El RUC debe tener 11 dígitos";
+        break;
+      case "CEX":
+        if (number.length > 20) return "El CEX debe tener máximo 20 dígitos";
+        if (number.length < 1) return "El CEX debe tener al menos 1 dígito";
+        break;
+      default:
+        break;
+    }
+    return "";
+  };
+
+  const handleClientDocumentTypeChange = (e) => {
+    const newDocType = e.target.value;
+
+    setClientModalData((prev) => ({
+      ...prev,
+      documentType: newDocType,
+      documentNumber: "",
+      fullName: newDocType === "RUC" ? "" : prev.fullName,
+      companyName: newDocType !== "RUC" ? "" : prev.companyName,
+    }));
+
+    setClientModalErrors({});
+  };
+
+  const handleClientModalInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // Validación especial para documentNumber
+    if (name === "documentNumber") {
+      const numericOnly = /^\d*$/;
+      if (!numericOnly.test(value)) return;
+
+      const maxLength = getMaxLength();
+      if (value.length > maxLength) return;
+    }
+
+    if (name === "phoneNumber") {
+      const numericOnly = /^\d*$/;
+      if (!numericOnly.test(value)) return;
+      if (value.length > 9) return;
+    }
+
+    setClientModalData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Limpiar error del campo
+    if (clientModalErrors[name]) {
+      setClientModalErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateClientModal = () => {
+    const newErrors = {};
+
+    // Validar documento
+    const docError = validateDocumentNumber(
+      clientModalData.documentType,
+      clientModalData.documentNumber
+    );
+    if (docError) newErrors.documentNumber = docError;
+
+    // Validar según tipo de documento
+    if (clientModalData.documentType === "RUC") {
+      if (!clientModalData.companyName.trim()) {
+        newErrors.companyName = "La razón social es requerida para RUC";
+      }
+    } else {
+      // DNI o CEX
+      if (!clientModalData.fullName.trim()) {
+        newErrors.fullName = "El nombre completo es requerido";
+      }
+    }
+
+    setClientModalErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const prepareClientDataForBackend = () => {
+    const data = {
+      documentType: clientModalData.documentType,
+      documentNumber: clientModalData.documentNumber,
+      phoneNumber: clientModalData.phoneNumber,
+      active: true,
+    };
+
+    if (clientModalData.documentType === "RUC") {
+      data.companyName = clientModalData.companyName.trim();
+      data.fullName = "";
+    } else {
+      data.fullName = clientModalData.fullName.trim();
+      data.companyName = "";
+    }
+
+    return data;
+  };
+
+  const handleSaveClient = async () => {
+    if (!validateClientModal()) {
+      return;
+    }
+
+    try {
+      const dataToSend = prepareClientDataForBackend();
+      const response = await customerApi.create(dataToSend);
+
+      // ✅ Actualizar la lista de clientes
+      const clients = await customerApi.getAll();
+      const clientsWithDisplay = clients.map((client) => ({
+        ...client,
+        displayName: client.fullName || client.companyName || "Sin nombre",
+      }));
+      setAllClients(clientsWithDisplay);
+
+      // ✅ Seleccionar el nuevo cliente
+      setFormData((prev) => ({
+        ...prev,
+        clientId: response.id,
+      }));
+
+      // Cerrar modal y resetear
+      setIsClientModalOpen(false);
+      setClientModalData({
+        documentType: "DNI",
+        documentNumber: "",
+        fullName: "",
+        companyName: "",
+        phoneNumber: "",
+      });
+      setClientModalErrors({});
+
+      Swal.fire("Éxito", "Cliente agregado correctamente", "success");
+    } catch (error) {
+      console.error("Error al guardar cliente:", error);
+      Swal.fire(
+        "Error",
+        "No se pudo registrar el cliente. Intente nuevamente.",
+        "error"
+      );
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -260,6 +452,10 @@ const CreateSale = () => {
         clientName: "",
         clientDni: "",
         clientPhone: "",
+        userName: "ADMINISTRADOR",
+        paymentMethod: "1",
+        saleDate: getTodayDate(),
+        documentType: "1",
       });
     });
   };
@@ -386,8 +582,7 @@ const CreateSale = () => {
 
             {/* Información de la venta */}
             <div className={styles.formRow}>
-
-                <Select
+              <Select
                 label="Tipo de Comprobante:"
                 name="documentType"
                 value={formData.documentType}
@@ -408,29 +603,34 @@ const CreateSale = () => {
               />
             </div>
 
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Cliente:</label>
-                <div className={styles.clientInputGroup}>
-                  <input
-                    type="text"
-                    name="clientName"
-                    value={formData.clientName}
-                    onChange={handleInputChange}
-                    placeholder="Buscar o seleccionar cliente..."
-                    className={styles.input}
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleOpenClientModal}
-                    variant="primary"
-                    size="small"
-                  >
-                    + Nuevo
-                  </Button>
-                </div>
-              </div>
+            <div className={styles.formGroup}>
+              {/* ✅ Usar SearchSelect en lugar del input manual */}
+              <SearchSelect
+                label="Cliente"
+                name="clientId"
+                options={allClients}
+                value={formData.clientId}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    clientId: e.target.value,
+                  }));
+                }}
+                placeholder="Buscar cliente..."
+                displayKey="fullName" // o usar una función para mostrar fullName o companyName
+                valueKey="id"
+              />
 
+              <Button
+                type="button"
+                onClick={handleOpenClientModal}
+                variant="primary"
+                size="small"
+              >
+                +
+              </Button>
+            </div>
+            <div className={styles.formGroup}>
               <Input
                 label="Usuario:"
                 name="userName"
@@ -452,15 +652,13 @@ const CreateSale = () => {
                 required
               />
 
-
-                <Input
-                  label="Fecha de Venta:"
-                  name="saleDate"
-                  type="date"
-                  value={formData.saleDate}
-                  onChange={handleInputChange}
-                />
-
+              <Input
+                label="Fecha de Venta:"
+                name="saleDate"
+                type="date"
+                value={formData.saleDate}
+                onChange={handleInputChange}
+              />
             </div>
 
             {/* Tabla de productos */}
@@ -536,44 +734,136 @@ const CreateSale = () => {
       {/* Modal de Nuevo Cliente */}
       <Modal
         isOpen={isClientModalOpen}
-        onClose={() => setIsClientModalOpen(false)}
+        onClose={() => {
+          setIsClientModalOpen(false);
+          setClientModalData({
+            documentType: "DNI",
+            documentNumber: "",
+            fullName: "",
+            companyName: "",
+            phoneNumber: "",
+          });
+          setClientModalErrors({});
+        }}
         title="Nuevo Cliente"
         size="small"
       >
         <div className={styles.modalContent}>
-          <Input
-            label="DNI"
-            name="clientDni"
-            value={formData.clientDni}
-            onChange={handleInputChange}
-            placeholder="Ingrese DNI"
-            maxLength={8}
-            required
-          />
+          {/* Tipo de Documento */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Tipo de Documento <span style={{ color: "red" }}>*</span>
+            </label>
+            <select
+              name="documentType"
+              value={clientModalData.documentType}
+              onChange={handleClientDocumentTypeChange}
+              className={styles.input}
+            >
+              {identityDocumentTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <Input
-            label="Nombre"
-            name="clientName"
-            value={formData.clientName}
-            onChange={handleInputChange}
-            placeholder="Ingrese nombre completo"
-            required
-          />
+          {/* Número de Documento */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Número de Documento <span style={{ color: "red" }}>*</span>
+            </label>
+            <input
+              type="text"
+              name="documentNumber"
+              value={clientModalData.documentNumber}
+              onChange={handleClientModalInputChange}
+              className={styles.input}
+              placeholder={`Ingrese ${
+                clientModalData.documentType
+              } (${getMaxLength()} dígitos${
+                clientModalData.documentType === "CEX" ? " máx." : ""
+              })`}
+              maxLength={getMaxLength()}
+            />
+            {clientModalErrors.documentNumber && (
+              <span style={{ color: "red", fontSize: "0.85rem" }}>
+                {clientModalErrors.documentNumber}
+              </span>
+            )}
+          </div>
 
+          {/* Campo condicional: Razón Social (solo para RUC) */}
+          {clientModalData.documentType === "RUC" && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Razón Social <span style={{ color: "red" }}>*</span>
+              </label>
+              <input
+                type="text"
+                name="companyName"
+                value={clientModalData.companyName}
+                onChange={handleClientModalInputChange}
+                className={styles.input}
+                placeholder="Ingrese la razón social"
+              />
+              {clientModalErrors.companyName && (
+                <span style={{ color: "red", fontSize: "0.85rem" }}>
+                  {clientModalErrors.companyName}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Campo condicional: Nombre Completo (solo para DNI y CEX) */}
+          {(clientModalData.documentType === "DNI" ||
+            clientModalData.documentType === "CEX") && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Nombre Completo <span style={{ color: "red" }}>*</span>
+              </label>
+              <input
+                type="text"
+                name="fullName"
+                value={clientModalData.fullName}
+                onChange={handleClientModalInputChange}
+                className={styles.input}
+                placeholder="Ingrese el nombre completo"
+              />
+              {clientModalErrors.fullName && (
+                <span style={{ color: "red", fontSize: "0.85rem" }}>
+                  {clientModalErrors.fullName}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Teléfono */}
           <Input
             label="Teléfono"
-            name="clientPhone"
-            value={formData.clientPhone}
-            onChange={handleInputChange}
-            placeholder="Ingrese teléfono"
+            name="phoneNumber"
+            value={clientModalData.phoneNumber}
+            onChange={handleClientModalInputChange}
+            placeholder="Ingrese el teléfono"
             maxLength={15}
           />
 
+          {/* Botones */}
           <div className={styles.modalActions}>
             <Button
               type="button"
               variant="secondary"
-              onClick={() => setIsClientModalOpen(false)}
+              onClick={() => {
+                setIsClientModalOpen(false);
+                setClientModalData({
+                  documentType: "DNI",
+                  documentNumber: "",
+                  fullName: "",
+                  companyName: "",
+                  phoneNumber: "",
+                });
+                setClientModalErrors({});
+              }}
             >
               Cancelar
             </Button>

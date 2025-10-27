@@ -18,7 +18,6 @@ const CreatePurchase = () => {
 
   const [documentTypes] = useState(mockDocumentTypes);
   const [allSuppliers, setAllSuppliers] = useState([]);
-  const [providerSearchTerm, setProviderSearchTerm] = useState("");
 
   // Hook personalizado para búsqueda de productos
   const { searchTerm, setSearchTerm, filteredProducts, loading } =
@@ -137,7 +136,6 @@ const CreatePurchase = () => {
       documentNumber: "",
     });
     setPurchaseItems([]);
-    setProviderSearchTerm("");
     setSearchTerm("");
   };
 
