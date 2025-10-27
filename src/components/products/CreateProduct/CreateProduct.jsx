@@ -136,7 +136,7 @@ const CreateProduct = () => {
 
   const removePackage = (index) => {
     if (formData.packages.length === 1) {
-      Swal.fire("Advertencia", "Debe haber al menos un paquete", "warning");
+      Swal.fire("Advertencia", "Debe haber al menos una presentación", "warning");
       return;
     }
     setFormData((prev) => ({
@@ -176,7 +176,7 @@ const CreateProduct = () => {
           const imageUrl = await getDownloadURL(storageRef);
           updatedPackages[i].imageUrl = imageUrl;
           console.log(
-            `URL de descarga de la imagen para paquete ${i + 1}:`,
+            `URL de descarga de la imagen para presentación ${i + 1}:`,
             imageUrl
           );
         }
@@ -362,13 +362,13 @@ const CreateProduct = () => {
             </div>
           </div>
 
-          {/* Paquetes */}
+          {/* Presentación */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Paquetes</h3>
+            <h3 className={styles.sectionTitle}>Presentación</h3>
 
             {formData.packages.map((pkg, index) => (
               <div key={index} className={styles.packageSection}>
-                <h4 className={styles.sectionTitle}>Paquete {index + 1}</h4>
+                <h4 className={styles.sectionTitle}>Presentación {index + 1}</h4>
 
                 <div className={styles.formRow}>
                   <Input
@@ -377,7 +377,7 @@ const CreateProduct = () => {
                     onChange={(e) =>
                       handlePackageChange(index, "sku", e.target.value)
                     }
-                    placeholder="Código SKU del paquete"
+                    placeholder="Código SKU de la presentación"
                   />
 
                   <Input
@@ -386,7 +386,7 @@ const CreateProduct = () => {
                     onChange={(e) =>
                       handlePackageChange(index, "barcode", e.target.value)
                     }
-                    placeholder="Código de barras del paquete"
+                    placeholder="Código de barras de la presentación"
                   />
                 </div>
 
@@ -455,16 +455,16 @@ const CreateProduct = () => {
                           className={styles.checkbox}
                         />
                         <span className={styles.checkboxText}>
-                          Paquete Activo
+                          Presentación Activa
                         </span>
                       </label>
                     </div>
                   </div>
                 </div>
 
-                {/* Imagen por paquete */}
+                {/* Imagen por presentación */}
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>Imagen del Paquete</label>
+                  <label className={styles.label}>Imagen de la Presentación</label>
                   <input
                     type="file"
                     onChange={(e) => handlePackageImageChange(index, e)}
@@ -473,7 +473,7 @@ const CreateProduct = () => {
                     <div className={styles.imagePreview}>
                       <img
                         src={pkg.imagePreviewUrl}
-                        alt="Vista previa del paquete"
+                        alt="Vista previa de la presentación"
                         className={styles.previewImage}
                       />
                     </div>
@@ -492,7 +492,7 @@ const CreateProduct = () => {
                       className={styles.cancelButton}
                       style={{ maxWidth: "fit-content" }}
                     >
-                      Eliminar Paquete
+                      Eliminar Presentación
                     </button>
                   </div>
                 </div>
@@ -505,7 +505,7 @@ const CreateProduct = () => {
               variant="primary"
               size="medium"
             >
-              + Agregar Paquete
+              + Agregar Presentación
             </Button>
           </div>
 
