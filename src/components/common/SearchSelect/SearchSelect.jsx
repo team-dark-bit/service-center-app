@@ -14,6 +14,8 @@ const SearchSelect = ({
   error,
   displayKey = 'name',    // Campo a mostrar (default: 'name')
   valueKey = 'id',        // Campo del valor (default: 'id')
+  searchKeys = null,      // Array de campos donde buscar: ['fullName', 'companyName'] o null para usar displayKey
+  fallbackDisplayKey = null, // Campo alternativo a mostrar si displayKey está vacío
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -21,32 +23,62 @@ const SearchSelect = ({
   const [selectedLabel, setSelectedLabel] = useState('');
   const dropdownRef = useRef(null);
 
+  // Función helper para obtener el texto a mostrar
+  const getDisplayText = (option) => {
+    const primaryText = option[displayKey];
+    
+    // Si hay texto primario, usarlo
+    if (primaryText && primaryText.trim() !== '') {
+      return primaryText;
+    }
+    
+    // Si no hay texto primario y existe fallbackDisplayKey, usar el fallback
+    if (fallbackDisplayKey && option[fallbackDisplayKey]) {
+      return option[fallbackDisplayKey];
+    }
+    
+    return primaryText || '';
+  };
+
   // Actualizar el label cuando cambia el value
   useEffect(() => {
     if (value) {
       const selected = options.find(opt => opt[valueKey] === value);
       if (selected) {
-        setSelectedLabel(selected[displayKey]);
-        setSearchTerm(selected[displayKey]);
+        const displayText = getDisplayText(selected);
+        setSelectedLabel(displayText);
+        setSearchTerm(displayText);
       }
     } else {
       setSelectedLabel('');
       setSearchTerm('');
     }
-  }, [value, options, valueKey, displayKey]);
+  }, [value, options, valueKey, displayKey, fallbackDisplayKey]);
 
-  // Filtrar opciones
+  // Filtrar opciones con búsqueda en múltiples campos
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setFilteredOptions([]);
       return;
     }
 
-    const results = options.filter(option =>
-      option[displayKey].toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const searchLower = searchTerm.toLowerCase();
+    
+    const results = options.filter(option => {
+      // Si searchKeys está definido, buscar en esos campos
+      if (searchKeys && Array.isArray(searchKeys)) {
+        return searchKeys.some(key => {
+          const fieldValue = option[key];
+          return fieldValue && fieldValue.toLowerCase().includes(searchLower);
+        });
+      }
+      
+      // Si no hay searchKeys, usar displayKey (comportamiento por defecto)
+      return option[displayKey]?.toLowerCase().includes(searchLower);
+    });
+    
     setFilteredOptions(results);
-  }, [searchTerm, options, displayKey]);
+  }, [searchTerm, options, displayKey, searchKeys]);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -72,8 +104,9 @@ const SearchSelect = ({
   };
 
   const handleSelectOption = (option) => {
-    setSearchTerm(option[displayKey]);
-    setSelectedLabel(option[displayKey]);
+    const displayText = getDisplayText(option);
+    setSearchTerm(displayText);
+    setSelectedLabel(displayText);
     setShowDropdown(false);
     
     // Llamar onChange con el ID seleccionado
@@ -135,7 +168,7 @@ const SearchSelect = ({
               onClick={() => handleSelectOption(option)}
               className={styles.dropdownItem}
             >
-              {option[displayKey]}
+              {getDisplayText(option)}
             </li>
           ))}
         </ul>

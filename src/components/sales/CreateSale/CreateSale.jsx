@@ -17,7 +17,7 @@ const CreateSale = () => {
   ];
 
   const paymentMethods = [
-    { id: "1", name: "PAGO EFECTIVO" },
+    { id: "1", name: "EFECTIVO" },
     { id: "2", name: "YAPE" },
     { id: "3", name: "PLIN" },
   ];
@@ -388,7 +388,6 @@ const CreateSale = () => {
       const dataToSend = prepareClientDataForBackend();
       const response = await customerApi.create(dataToSend);
 
-      // ✅ Actualizar la lista de clientes
       const clients = await customerApi.getAll();
       const clientsWithDisplay = clients.map((client) => ({
         ...client,
@@ -396,7 +395,6 @@ const CreateSale = () => {
       }));
       setAllClients(clientsWithDisplay);
 
-      // ✅ Seleccionar el nuevo cliente
       setFormData((prev) => ({
         ...prev,
         clientId: response.id,
@@ -603,29 +601,32 @@ const CreateSale = () => {
               />
             </div>
 
-            <div className={styles.formGroup}>
-              {/* ✅ Usar SearchSelect en lugar del input manual */}
-              <SearchSelect
-                label="Cliente"
-                name="clientId"
-                options={allClients}
-                value={formData.clientId}
-                onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    clientId: e.target.value,
-                  }));
-                }}
-                placeholder="Buscar cliente..."
-                displayKey="fullName" // o usar una función para mostrar fullName o companyName
-                valueKey="id"
-              />
-
+            <div className={styles.clientInputGroup}>
+              <div className={styles.searchSelectWrapper}>
+                <SearchSelect
+                  label="Cliente:"
+                  name="clientId"
+                  options={allClients}
+                  value={formData.clientId}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      clientId: e.target.value,
+                    }));
+                  }}
+                  placeholder="Buscar cliente..."
+                  displayKey="fullName"
+                  fallbackDisplayKey="companyName"
+                  valueKey="id"
+                  searchKeys={["fullName", "companyName"]}
+                />
+              </div>
               <Button
                 type="button"
                 onClick={handleOpenClientModal}
                 variant="primary"
                 size="small"
+                className={styles.addButton}
               >
                 +
               </Button>
