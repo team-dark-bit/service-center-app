@@ -413,12 +413,31 @@
 .clientInputGroup {
   display: flex;
   gap: 0.75rem;
+  align-items: flex-end;
 }
 
-.clientInputGroup .input {
+.clientInputGroup .searchSelectWrapper {
   flex: 1;
+  min-width: 0;
 }
 
+/* IMPORTANTE: Elimina el margin-bottom del SearchSelect cuando está dentro de clientInputGroup */
+.clientInputGroup .searchSelectWrapper > div {
+  margin-bottom: 0 !important;
+}
+
+.clientInputGroup .addButton {
+  height: 42px; /* Altura del input (0.75rem padding top + 0.75rem padding bottom + font-size) */
+  min-width: 42px;
+  width: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
 /* Tabla - MÁS COMPACTA */
 .productsTable {
   width: 100%;
