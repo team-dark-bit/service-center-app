@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import styles from './Sidebar.module.css';
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [activeMenus, setActiveMenus] = useState({});
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [scrollState, setScrollState] = useState({ hasScrollTop: false, hasScrollBottom: false });
+  const [scrollState, setScrollState] = useState({
+    hasScrollTop: false,
+    hasScrollBottom: false,
+  });
   const sidebarContentRef = useRef(null);
 
   // Función para manejar el estado del scroll
@@ -27,14 +30,14 @@ const Sidebar = () => {
     const handleResize = () => {
       const width = window.innerWidth;
       setIsMobile(width <= 768);
-      
+
       // Auto-colapsar en pantallas medianas
       if (width <= 1024 && width > 768) {
         setIsCollapsed(true);
       } else if (width > 1024) {
         setIsCollapsed(false);
       }
-      
+
       // Cerrar menú móvil si se expande la pantalla
       if (width > 768) {
         setIsMobileOpen(false);
@@ -42,8 +45,8 @@ const Sidebar = () => {
     };
 
     handleResize(); // Ejecutar al montar
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Configurar scroll listener
@@ -51,11 +54,11 @@ const Sidebar = () => {
     const element = sidebarContentRef.current;
     if (!element) return;
 
-    element.addEventListener('scroll', handleScroll);
+    element.addEventListener("scroll", handleScroll);
     // Verificar estado inicial del scroll
     handleScroll();
 
-    return () => element.removeEventListener('scroll', handleScroll);
+    return () => element.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Verificar scroll cuando cambia el contenido (menús expandidos)
@@ -67,10 +70,10 @@ const Sidebar = () => {
   const toggleMenu = (menuId) => {
     // En modo colapsado, no mostrar submenús
     if (isCollapsed && !isMobile) return;
-    
-    setActiveMenus(prev => ({
+
+    setActiveMenus((prev) => ({
       ...prev,
-      [menuId]: !prev[menuId]
+      [menuId]: !prev[menuId],
     }));
   };
 
@@ -84,278 +87,304 @@ const Sidebar = () => {
 
   const menuItems = [
     {
-      id: 'home',
-      title: 'Inicio',
-      icon: '🏠',
-      href: '/'
+      id: "home",
+      title: "Inicio",
+      icon: "🏠",
+      href: "/",
     },
     {
-      id: 'dashboard',
-      title: 'Dashboard',
-      icon: '📊',
-      href: '#dashboard'
+      id: "dashboard",
+      title: "Dashboard",
+      icon: "📊",
+      href: "#dashboard",
     },
     {
-      id: 'productos',
-      title: 'Productos',
-      icon: '📦',
+      id: "productos",
+      title: "Productos",
+      icon: "📦",
       subItems: [
         {
-          id: 'crear-producto',
-          title: 'Crear Producto',
-          href: '/products/create',
-          icon: '➕'
-        },
-        { 
-          id: 'catalogo', 
-          title: 'Catálogo', 
-          href: '#catalogo',
-          icon: '📋'
-        },
-        { 
-          id: 'listar-productos', 
-          title: 'Inventario', 
-          href: '/products/list-products',
-          icon: '📚'
+          id: "crear-producto",
+          title: "Crear Producto",
+          href: "/products/create",
+          icon: "➕",
         },
         {
-          id: 'compras',
-          title: 'Compras',
-          icon: '🛒',
+          id: "catalogo",
+          title: "Catálogo",
+          href: "#catalogo",
+          icon: "📋",
+        },
+        {
+          id: "listar-productos",
+          title: "Inventario",
+          href: "/products",
+          icon: "📚",
+        },
+        {
+          id: "compras",
+          title: "Compras",
+          icon: "🛒",
           subItems: [
-            { id: 'registrar-compra', title: 'Registrar', href: '/purchases/create', icon: '➕' },
-            { id: 'listar-compras', title: 'Listar', href: '#listar', icon: '📄' },
-            { id: 'proveedores', title: 'Proveedores', href: '#proveedores', icon: '🏢' }
-          ]
+            {
+              id: "registrar-compra",
+              title: "Registrar",
+              href: "/purchases/create",
+              icon: "➕",
+            },
+            {
+              id: "listar-compras",
+              title: "Listar",
+              href: "#listar",
+              icon: "📄",
+            },
+            {
+              id: "proveedores",
+              title: "Proveedores",
+              href: "#proveedores",
+              icon: "🏢",
+            },
+          ],
         },
-        { 
-          id: 'categorias', 
-          title: 'Categorías', 
-          href: '#categorias',
-          icon: '🏷️'
-        }
-      ]
+        {
+          id: "categorias",
+          title: "Categorías",
+          href: "#categorias",
+          icon: "🏷️",
+        },
+      ],
     },
     {
-      id: 'ventas',
-      title: 'Ventas',
-      icon: '💰',
+      id: "ventas",
+      title: "Ventas",
+      icon: "💰",
       subItems: [
-        { 
-          id: 'ventas', 
-          title: 'Registrar Venta', 
-          href: '/sales/create',
-          icon: '🆕'
+        {
+          id: "ventas",
+          title: "Registrar Venta",
+          href: "/sales/create",
+          icon: "🆕",
         },
-        { 
-          id: 'historial-ventas', 
-          title: 'Historial', 
-          href: '#historial',
-          icon: '📊'
+        {
+          id: "historial-ventas",
+          title: "Historial",
+          href: "#historial",
+          icon: "📊",
         },
-        { 
-          id: 'clientes', 
-          title: 'Clientes', 
-          href: '#clientes',
-          icon: '👥'
+        {
+          id: "clientes",
+          title: "Clientes",
+          href: "#clientes",
+          icon: "👥",
         },
-        { 
-          id: 'cotizaciones', 
-          title: 'Cotizaciones', 
-          href: '#cotizaciones',
-          icon: '📝'
-        }
-      ]
+        {
+          id: "cotizaciones",
+          title: "Cotizaciones",
+          href: "#cotizaciones",
+          icon: "📝",
+        },
+      ],
     },
     {
-      id: 'finanzas',
-      title: 'Finanzas',
-      icon: '💳',
+      id: "finanzas",
+      title: "Finanzas",
+      icon: "💳",
       subItems: [
-        { 
-          id: 'caja', 
-          title: 'Caja', 
-          href: '#caja',
-          icon: '💵'
+        {
+          id: "caja",
+          title: "Caja",
+          href: "#caja",
+          icon: "💵",
         },
-        { 
-          id: 'facturacion', 
-          title: 'Facturación', 
-          href: '#facturacion',
-          icon: '🧾'
+        {
+          id: "facturacion",
+          title: "Facturación",
+          href: "#facturacion",
+          icon: "🧾",
         },
-        { 
-          id: 'gastos', 
-          title: 'Gastos', 
-          href: '#gastos',
-          icon: '💸'
+        {
+          id: "gastos",
+          title: "Gastos",
+          href: "#gastos",
+          icon: "💸",
         },
-        { 
-          id: 'impuestos', 
-          title: 'Impuestos', 
-          href: '#impuestos',
-          icon: '🏛️'
-        }
-      ]
+        {
+          id: "impuestos",
+          title: "Impuestos",
+          href: "#impuestos",
+          icon: "🏛️",
+        },
+      ],
     },
     {
-      id: 'reportes',
-      title: 'Reportes',
-      icon: '📈',
+      id: "reportes",
+      title: "Reportes",
+      icon: "📈",
       subItems: [
-        { 
-          id: 'ventas-reporte', 
-          title: 'Reporte de Ventas', 
-          href: '#reporte-ventas',
-          icon: '📊'
+        {
+          id: "ventas-reporte",
+          title: "Reporte de Ventas",
+          href: "#reporte-ventas",
+          icon: "📊",
         },
-        { 
-          id: 'inventario-reporte', 
-          title: 'Reporte de Inventario', 
-          href: '#reporte-inventario',
-          icon: '📋'
+        {
+          id: "inventario-reporte",
+          title: "Reporte de Inventario",
+          href: "#reporte-inventario",
+          icon: "📋",
         },
-        { 
-          id: 'financiero', 
-          title: 'Estado Financiero', 
-          href: '#estado-financiero',
-          icon: '💹'
-        }
-      ]
+        {
+          id: "financiero",
+          title: "Estado Financiero",
+          href: "#estado-financiero",
+          icon: "💹",
+        },
+      ],
     },
     {
-      id: 'proveedores',
-      title: 'Proveedores',
-      icon: '👨‍💼',
+      id: "proveedores",
+      title: "Proveedores",
+      icon: "👨‍💼",
       subItems: [
-        { 
-          id: 'registrar-proveedor', 
-          title: 'Registrar Proveedor', 
-          href: '/suppliers/create',
-          icon: '➕'
+        {
+          id: "registrar-proveedor",
+          title: "Registrar Proveedor",
+          href: "/suppliers/create",
+          icon: "➕",
         },
-        { 
-          id: 'nomina', 
-          title: 'Nómina', 
-          href: '#nomina',
-          icon: '💰'
+        {
+          id: "nomina",
+          title: "Nómina",
+          href: "#nomina",
+          icon: "💰",
         },
-        { 
-          id: 'listar-proveedores', 
-          title: 'Listar Proveedores', 
-          href: '/suppliers/list',
-          icon: '📅'
-        }
-      ]
+        {
+          id: "listar-proveedores",
+          title: "Listar Proveedores",
+          href: "/suppliers",
+          icon: "📅",
+        },
+      ],
     },
     {
-      id: 'marketing',
-      title: 'Marketing',
-      icon: '📢',
+      id: "clientes",
+      title: "Clientes",
+      icon: "👥",
       subItems: [
-        { 
-          id: 'campanas', 
-          title: 'Campañas', 
-          href: '#campanas',
-          icon: '🎯'
+        {
+          id: "nuevo-cliente",
+          title: "Nuevo Cliente",
+          href: "/customers/create",
+          icon: "➕", 
         },
-        { 
-          id: 'promociones', 
-          title: 'Promociones', 
-          href: '#promociones',
-          icon: '🎁'
-        }
-      ]
+        {
+          id: "listar-clientes",
+          title: "Listar Clientes",
+          href: "/customers",
+          icon: "📋",
+        },
+      ],
     },
     {
-      id: 'configuracion',
-      title: 'Configuración',
-      icon: '⚙️',
+      id: "configuracion",
+      title: "Configuración",
+      icon: "⚙️",
       subItems: [
-        { 
-          id: 'empresa', 
-          title: 'Datos de Empresa', 
-          href: '#empresa',
-          icon: '🏢'
+        {
+          id: "empresa",
+          title: "Datos de Empresa",
+          href: "#empresa",
+          icon: "🏢",
         },
-        { 
-          id: 'usuarios', 
-          title: 'Usuarios', 
-          href: '#usuarios',
-          icon: '👤'
+        {
+          id: "usuarios",
+          title: "Usuarios",
+          href: "#usuarios",
+          icon: "👤",
         },
-        { 
-          id: 'permisos', 
-          title: 'Permisos', 
-          href: '#permisos',
-          icon: '🔐'
+        {
+          id: "permisos",
+          title: "Permisos",
+          href: "#permisos",
+          icon: "🔐",
         },
-        { 
-          id: 'backup', 
-          title: 'Respaldo', 
-          href: '#backup',
-          icon: '💾'
-        }
-      ]
+        {
+          id: "backup",
+          title: "Respaldo",
+          href: "#backup",
+          icon: "💾",
+        },
+      ],
     },
     {
-      id: 'ayuda',
-      title: 'Ayuda',
-      icon: '❓',
+      id: "ayuda",
+      title: "Ayuda",
+      icon: "❓",
       subItems: [
-        { 
-          id: 'documentacion', 
-          title: 'Documentación', 
-          href: '#docs',
-          icon: '📖'
+        {
+          id: "documentacion",
+          title: "Documentación",
+          href: "#docs",
+          icon: "📖",
         },
-        { 
-          id: 'soporte', 
-          title: 'Soporte Técnico', 
-          href: '#soporte',
-          icon: '🛠️'
+        {
+          id: "soporte",
+          title: "Soporte Técnico",
+          href: "#soporte",
+          icon: "🛠️",
         },
-        { 
-          id: 'acerca', 
-          title: 'Acerca de', 
-          href: '#acerca',
-          icon: 'ℹ️'
-        }
-      ]
-    }
+        {
+          id: "acerca",
+          title: "Acerca de",
+          href: "#acerca",
+          icon: "ℹ️",
+        },
+      ],
+    },
   ];
 
   const renderMenuItem = (item, level = 0) => {
     const hasSubItems = item.subItems && item.subItems.length > 0;
     const isActive = activeMenus[item.id];
     const showSubItems = isActive && !isCollapsed;
-    
-    const paddingClass = level === 0 ? '' : 
-                        level === 1 ? styles.paddingLevel1 : 
-                        styles.paddingLevel2;
+
+    const paddingClass =
+      level === 0
+        ? ""
+        : level === 1
+        ? styles.paddingLevel1
+        : styles.paddingLevel2;
 
     return (
       <div key={item.id} className={styles.menuItem}>
         {hasSubItems ? (
           <button
-            className={`${styles.sidebarItem} ${paddingClass} ${isActive ? styles.active : ''}`}
+            className={`${styles.sidebarItem} ${paddingClass} ${
+              isActive ? styles.active : ""
+            }`}
             onClick={() => toggleMenu(item.id)}
             aria-expanded={showSubItems}
-            title={isCollapsed ? item.title : ''}
+            title={isCollapsed ? item.title : ""}
           >
             <span className={styles.sidebarIcon}>{item.icon}</span>
             {(!isCollapsed || isMobile) && (
               <>
                 <span className={styles.sidebarText}>{item.title}</span>
-                <span className={`${styles.sidebarArrow} ${showSubItems ? styles.rotated : ''}`}>▼</span>
+                <span
+                  className={`${styles.sidebarArrow} ${
+                    showSubItems ? styles.rotated : ""
+                  }`}
+                >
+                  ▼
+                </span>
               </>
             )}
           </button>
         ) : (
-          <Link 
-            to={item.href || '#'} 
+          <Link
+            to={item.href || "#"}
             className={`${styles.sidebarItem} ${paddingClass}`}
-            title={isCollapsed ? item.title : ''}
+            title={isCollapsed ? item.title : ""}
           >
             <span className={styles.sidebarIcon}>{item.icon}</span>
             {(!isCollapsed || isMobile) && (
@@ -363,10 +392,10 @@ const Sidebar = () => {
             )}
           </Link>
         )}
-        
+
         {hasSubItems && showSubItems && (
           <div className={`${styles.submenu} ${styles.show}`}>
-            {item.subItems.map(subItem => renderMenuItem(subItem, level + 1))}
+            {item.subItems.map((subItem) => renderMenuItem(subItem, level + 1))}
           </div>
         )}
       </div>
@@ -375,22 +404,22 @@ const Sidebar = () => {
 
   const sidebarClasses = `
     ${styles.sidebar}
-    ${isCollapsed && !isMobile ? styles.collapsed : ''}
-    ${isMobile ? styles.mobile : ''}
-    ${isMobileOpen ? styles.mobileOpen : ''}
+    ${isCollapsed && !isMobile ? styles.collapsed : ""}
+    ${isMobile ? styles.mobile : ""}
+    ${isMobileOpen ? styles.mobileOpen : ""}
   `.trim();
 
   const contentClasses = `
     ${styles.sidebarContent}
-    ${scrollState.hasScrollTop ? styles.hasScrollTop : ''}
-    ${scrollState.hasScrollBottom ? styles.hasScrollBottom : ''}
+    ${scrollState.hasScrollTop ? styles.hasScrollTop : ""}
+    ${scrollState.hasScrollBottom ? styles.hasScrollBottom : ""}
   `.trim();
 
   return (
     <>
       {/* Botón de menú hamburguesa para móvil */}
       {isMobile && (
-        <button 
+        <button
           className={styles.hamburger}
           onClick={toggleSidebar}
           aria-label="Toggle menu"
@@ -403,7 +432,7 @@ const Sidebar = () => {
 
       {/* Overlay para móvil */}
       {isMobile && isMobileOpen && (
-        <div 
+        <div
           className={styles.overlay}
           onClick={() => setIsMobileOpen(false)}
         />
@@ -413,22 +442,22 @@ const Sidebar = () => {
         {/* Header con logo */}
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
-            <img 
-              src="/api/placeholder/40/40" 
-              alt="Logo" 
+            <img
+              src="/api/placeholder/40/40"
+              alt="Logo"
               className={styles.logoImage}
             />
             {(!isCollapsed || isMobile) && (
               <h4 className={styles.logoText}>MiEmpresa</h4>
             )}
           </div>
-          
+
           {/* Botón para colapsar/expandir en desktop */}
           {!isMobile && (
-            <button 
+            <button
               className={styles.toggleButton}
               onClick={toggleSidebar}
-              aria-label={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+              aria-label={isCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
             >
               <div className={styles.hamburgerIcon}>
                 <span></span>
@@ -442,7 +471,7 @@ const Sidebar = () => {
         {/* Navigation Menu */}
         <div className={contentClasses} ref={sidebarContentRef}>
           <div className={styles.sidebarMenu}>
-            {menuItems.map(item => renderMenuItem(item))}
+            {menuItems.map((item) => renderMenuItem(item))}
           </div>
         </div>
 
@@ -450,9 +479,9 @@ const Sidebar = () => {
         <div className={styles.sidebarFooter}>
           <div className={styles.userInfo}>
             <div className={styles.userAvatar}>
-              <img 
-                src="/api/placeholder/32/32" 
-                alt="Usuario" 
+              <img
+                src="/api/placeholder/32/32"
+                alt="Usuario"
                 className={styles.avatarImage}
               />
             </div>

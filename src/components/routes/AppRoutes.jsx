@@ -1,49 +1,52 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import CreateProduct from "../products/CreateProduct/CreateProduct";
+import ProductList from "../products/ProductList/ProductList";
 import CreatePurchase from "../purchases/CreatePurchase/CreatePurchase";
 import CreateSupplier from "../suppliers/CreateSupplier/CreateSupplier";
-import ProductList from "../products/ProductList/ProductList";
 import SupplierList from "../suppliers/SupplierList/SupplierList";
 import CreateSale from "../sales/CreateSale/CreateSale";
-
+import CreateCustomer from "../customers/CreateCustomer/CreateCustomer";
+import CustomerList from "../customers/CustomerList/CustomerList";
 
 export const AppRoutes = () => {
-    return (
-        <Routes>
+  return (
+    <Routes>
+      {/* Ruta raíz - Redireccionar a una página por defecto */}
+      <Route path="/" element={<Navigate to="/products" replace />} />
 
-            <Route
-                path="products/create"
-                element={<CreateProduct />}
-            />
-            <Route
-                path="purchases/create"
-                element={<CreatePurchase />}
-            />
+      {/* ============== PRODUCTOS ============== */}
+      <Route path="products">
+        <Route index element={<ProductList />} /> {/* /products */}
+        <Route path="create" element={<CreateProduct />} /> {/* /products/create */}
+        <Route path="edit/:id" element={<CreateProduct />} /> {/* /products/edit/:id */}
+      </Route>
 
-            <Route
-                path="suppliers/create"
-                element={<CreateSupplier />}
-            />
+      {/* ============== COMPRAS ============== */}
+      <Route path="purchases">
+        <Route path="create" element={<CreatePurchase />} />
+      </Route>
 
-            <Route
-                path="suppliers/edit/:id"
-                element={<CreateSupplier />}
-            />
+      {/* ============== PROVEEDORES ============== */}
+      <Route path="suppliers">
+        <Route index element={<SupplierList />} /> {/* /suppliers */}
+        <Route path="create" element={<CreateSupplier />} />
+        <Route path="edit/:id" element={<CreateSupplier />} />
+      </Route>
 
-            <Route
-                path="suppliers/list"
-                element={<SupplierList />}
-            />
+      {/* ============== VENTAS ============== */}
+      <Route path="sales">
+        <Route path="create" element={<CreateSale />} />
+      </Route>
 
-            <Route
-                path="products/list-products"
-                element={<ProductList />}
-            />
+      {/* ============== CLIENTES ============== */}
+      <Route path="customers">
+        <Route index element={<CustomerList />} /> {/* /customers */}
+        <Route path="create" element={<CreateCustomer />} />
+        <Route path="edit/:id" element={<CreateCustomer />} />
+      </Route>
 
-            <Route
-                path="sales/create"
-                element={<CreateSale />}
-            />
-        </Routes>
-    )
-}
+      {/* Ruta 404 - Página no encontrada */}
+      <Route path="*" element={<Navigate to="/products" replace />} />
+    </Routes>
+  );
+};
