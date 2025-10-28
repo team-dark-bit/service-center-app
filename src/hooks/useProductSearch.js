@@ -19,15 +19,7 @@ const useProductSearch = () => {
     try {
       const data = await productApi.searchProducts(input.trim());
       
-      // Mapear los datos del backend
-      const mappedProducts = data.map(product => ({
-        id: product.productId,
-        name: product.productName,
-        sku: product.sku,
-        barcode: product.barcode
-      }));
-      
-      setFilteredProducts(mappedProducts);
+      setFilteredProducts(data);
     } catch (err) {
       setError(err.message);
       setFilteredProducts([]);
