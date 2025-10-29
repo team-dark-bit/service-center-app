@@ -112,7 +112,7 @@ const Sidebar = () => {
         {
           id: "catalogo",
           title: "Catálogo",
-          href: "#catalogo",
+          href: "/products/catalog",
           icon: "📋",
         },
         {

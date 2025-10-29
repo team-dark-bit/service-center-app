@@ -136,7 +136,11 @@ const CreateProduct = () => {
 
   const removePackage = (index) => {
     if (formData.packages.length === 1) {
-      Swal.fire("Advertencia", "Debe haber al menos una presentación", "warning");
+      Swal.fire(
+        "Advertencia",
+        "Debe haber al menos una presentación",
+        "warning"
+      );
       return;
     }
     setFormData((prev) => ({
@@ -368,7 +372,9 @@ const CreateProduct = () => {
 
             {formData.packages.map((pkg, index) => (
               <div key={index} className={styles.packageSection}>
-                <h4 className={styles.sectionTitle}>Presentación {index + 1}</h4>
+                <h4 className={styles.sectionTitle}>
+                  Presentación {index + 1}
+                </h4>
 
                 <div className={styles.formRow}>
                   <Input
@@ -436,54 +442,56 @@ const CreateProduct = () => {
                       ))}
                     </select>
                   </div>
-                </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <div className={styles.checkboxGroup}>
-                      <label className={styles.checkboxLabel}>
-                        <input
-                          type="checkbox"
-                          checked={pkg.status}
-                          onChange={(e) =>
-                            handlePackageChange(
-                              index,
-                              "status",
-                              e.target.checked
-                            )
-                          }
-                          className={styles.checkbox}
-                        />
-                        <span className={styles.checkboxText}>
-                          Presentación Activa
-                        </span>
-                      </label>
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <div className={styles.checkboxGroup}>
+                        <label className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            checked={pkg.status}
+                            onChange={(e) =>
+                              handlePackageChange(
+                                index,
+                                "status",
+                                e.target.checked
+                              )
+                            }
+                            className={styles.checkbox}
+                          />
+                          <span className={styles.checkboxText}>
+                            Presentación Activa
+                          </span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Imagen por presentación */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Imagen de la Presentación</label>
-                  <input
-                    type="file"
-                    onChange={(e) => handlePackageImageChange(index, e)}
-                  />
-                  {pkg.imagePreviewUrl && (
-                    <div className={styles.imagePreview}>
-                      <img
-                        src={pkg.imagePreviewUrl}
-                        alt="Vista previa de la presentación"
-                        className={styles.previewImage}
-                      />
-                    </div>
-                  )}
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>
+                      Imagen de la Presentación
+                    </label>
+                    <input
+                      type="file"
+                      onChange={(e) => handlePackageImageChange(index, e)}
+                    />
+                    {pkg.imagePreviewUrl && (
+                      <div className={styles.imagePreview}>
+                        <img
+                          src={pkg.imagePreviewUrl}
+                          alt="Vista previa de la presentación"
+                          className={styles.previewImage}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    
-                  </div>
+                  <div className={styles.formGroup}></div>
 
                   <div className={styles.formGroup}>
                     <button
