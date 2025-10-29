@@ -7,6 +7,7 @@ import SupplierList from "../suppliers/SupplierList/SupplierList";
 import CreateSale from "../sales/CreateSale/CreateSale";
 import CreateCustomer from "../customers/CreateCustomer/CreateCustomer";
 import CustomerList from "../customers/CustomerList/CustomerList";
+import ProductCatalog from "../products/ProductCatalog/ProductCatalog";
 
 export const AppRoutes = () => {
   return (
@@ -44,6 +45,9 @@ export const AppRoutes = () => {
         <Route path="create" element={<CreateCustomer />} />
         <Route path="edit/:id" element={<CreateCustomer />} />
       </Route>
+
+      {/* ============== CATÁLOGO DE PRODUCTOS ============== */}
+      <Route path="products/catalog" element={<ProductCatalog />} />
 
       {/* Ruta 404 - Página no encontrada */}
       <Route path="*" element={<Navigate to="/products" replace />} />
