@@ -40,6 +40,7 @@ const CreateProduct = () => {
         quantity: 1,
         imageFile: null,
         imagePreviewUrl: null,
+        description: "",
       },
     ],
   });
@@ -129,6 +130,7 @@ const CreateProduct = () => {
           quantity: 1,
           imageFile: null,
           imagePreviewUrl: null,
+          description: "",
         },
       ],
     }));
@@ -287,24 +289,14 @@ const CreateProduct = () => {
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Información Básica</h3>
 
-            <div className={styles.formRow}>
-              <Input
-                label="Nombre"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Ingrese el nombre del producto"
-                required
-              />
-
-              <Input
-                label="Alias"
-                name="displayName"
-                value={formData.displayName}
-                onChange={handleChange}
-                placeholder="Nombre alternativo del producto"
-              />
-            </div>
+            <Input
+              label="Nombre"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Ingrese el nombre del producto"
+              required
+            />
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
@@ -372,10 +364,20 @@ const CreateProduct = () => {
 
             {formData.packages.map((pkg, index) => (
               <div key={index} className={styles.packageSection}>
-                <h4 className={styles.sectionTitle}>
-                  Presentación {index + 1}
-                </h4>
-
+                <div className={styles.packageHeader}>
+                  <h4 className={styles.sectionTitle}>
+                    Presentación {index + 1}
+                  </h4>
+                  <Button
+                    type="button"
+                    onClick={() => removePackage(index)}
+                    variant="secondary"
+                    size="small"
+                    className={styles.removePackageButton}
+                  >
+                    X
+                  </Button>
+                </div>
                 <div className={styles.formRow}>
                   <Input
                     label="SKU"
@@ -443,28 +445,19 @@ const CreateProduct = () => {
                     </select>
                   </div>
 
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <div className={styles.checkboxGroup}>
-                        <label className={styles.checkboxLabel}>
-                          <input
-                            type="checkbox"
-                            checked={pkg.status}
-                            onChange={(e) =>
-                              handlePackageChange(
-                                index,
-                                "status",
-                                e.target.checked
-                              )
-                            }
-                            className={styles.checkbox}
-                          />
-                          <span className={styles.checkboxText}>
-                            Presentación Activa
-                          </span>
-                        </label>
-                      </div>
-                    </div>
+                  <div className={styles.formGroup}>
+                    <Input
+                      label="Descripcion"
+                      value={pkg.description}
+                      onChange={(e) =>
+                        handlePackageChange(
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Descripción de la presentación"
+                    />
                   </div>
                 </div>
 
@@ -487,21 +480,6 @@ const CreateProduct = () => {
                         />
                       </div>
                     )}
-                  </div>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}></div>
-
-                  <div className={styles.formGroup}>
-                    <button
-                      type="button"
-                      onClick={() => removePackage(index)}
-                      className={styles.cancelButton}
-                      style={{ maxWidth: "fit-content" }}
-                    >
-                      Eliminar Presentación
-                    </button>
                   </div>
                 </div>
               </div>
