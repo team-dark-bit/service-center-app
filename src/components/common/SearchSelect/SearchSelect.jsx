@@ -58,7 +58,7 @@ const SearchSelect = ({
   // Filtrar opciones con búsqueda en múltiples campos
   useEffect(() => {
     if (searchTerm.trim() === '') {
-      setFilteredOptions([]);
+      setFilteredOptions(options); // MODIFICADO: Mostrar todas las opciones cuando no hay búsqueda
       return;
     }
 
@@ -116,6 +116,20 @@ const SearchSelect = ({
   const handleInputFocus = () => {
     if (options.length > 0) {
       setShowDropdown(true);
+      // AGREGADO: Si no hay término de búsqueda, mostrar todas las opciones
+      if (searchTerm.trim() === '') {
+        setFilteredOptions(options);
+      }
+    }
+  };
+
+  // NUEVA FUNCIÓN: Manejar clic en el input
+  const handleInputClick = () => {
+    if (options.length > 0) {
+      setShowDropdown(true);
+      if (searchTerm.trim() === '') {
+        setFilteredOptions(options);
+      }
     }
   };
 
@@ -142,6 +156,7 @@ const SearchSelect = ({
           value={searchTerm}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
+          onClick={handleInputClick}
           placeholder={placeholder}
           disabled={disabled}
           className={`${styles.input} ${error ? styles.error : ''}`}
