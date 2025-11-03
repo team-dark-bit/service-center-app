@@ -122,35 +122,35 @@ const Sidebar = () => {
           icon: "📚",
         },
         {
-          id: "compras",
-          title: "Compras",
-          icon: "🛒",
-          subItems: [
-            {
-              id: "registrar-compra",
-              title: "Registrar",
-              href: "/purchases/create",
-              icon: "➕",
-            },
-            {
-              id: "listar-compras",
-              title: "Listar",
-              href: "#listar",
-              icon: "📄",
-            },
-            {
-              id: "proveedores",
-              title: "Proveedores",
-              href: "#proveedores",
-              icon: "🏢",
-            },
-          ],
-        },
-        {
           id: "categorias",
           title: "Categorías",
           href: "#categorias",
           icon: "🏷️",
+        },
+      ],
+    },
+    {
+      id: "compras",
+      title: "Compras",
+      icon: "🛒",
+      subItems: [
+        {
+          id: "registrar-compra",
+          title: "Registrar",
+          href: "/purchases/create",
+          icon: "➕",
+        },
+        {
+          id: "listar-compras",
+          title: "Listar",
+          href: "#listar",
+          icon: "📄",
+        },
+        {
+          id: "proveedores",
+          title: "Proveedores",
+          href: "#proveedores",
+          icon: "🏢",
         },
       ],
     },
@@ -275,7 +275,7 @@ const Sidebar = () => {
           id: "nuevo-cliente",
           title: "Nuevo Cliente",
           href: "/customers/create",
-          icon: "➕", 
+          icon: "➕",
         },
         {
           id: "listar-clientes",
