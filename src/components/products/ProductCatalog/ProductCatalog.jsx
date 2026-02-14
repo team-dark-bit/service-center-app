@@ -1,152 +1,19 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Swal from "sweetalert2";
 import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal";
 import ProductCard from "./ProductCard";
 import ProductListItem from "./ProductListItem";
+import productApi from "@/api/productApi";
 import styles from "./ProductCatalog.module.css";
 
 const ProductCatalog = () => {
-  // Mock de datos de productos
-  const mockProducts = [
-    {
-      id: "1",
-      brandId: "brand-1",
-      brandName: "Castrol",
-      subcategoryId: "subcat-1",
-      subcategoryName: "Lubricantes",
-      serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
-      name: "aceite-motor-castrol-20w50",
-      displayName: "Aceite de Motor Castrol 20W-50",
-      description: "Aceite sintético de alta calidad para motores de alto rendimiento",
-      activeFrom: "2024-01-15",
-      status: true,
-      categoryId: "cat-1",
-      categoryName: "Aceites",
-      packages: [
-        {
-          id: "pkg-1",
-          sku: "CAST-20W50-1L",
-          barcode: "7891234567890",
-          unitId: "unit-1",
-          unitName: "Litro",
-          packageId: "pack-1",
-          packageName: "Botella 1L",
-          imageUrl: "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-          activeFrom: "2024-01-15",
-          status: true,
-          quantity: 1,
-        },
-        {
-          id: "pkg-2",
-          sku: "CAST-20W50-4L",
-          barcode: "7891234567891",
-          unitId: "unit-1",
-          unitName: "Litro",
-          packageId: "pack-2",
-          packageName: "Garrafa 4L",
-          imageUrl: "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-          activeFrom: "2024-01-15",
-          status: true,
-          quantity: 4,
-        },
-      ],
-    },
-    {
-      id: "2",
-      brandId: "brand-2",
-      brandName: "Bosch",
-      subcategoryId: "subcat-2",
-      subcategoryName: "Filtros de Aceite",
-      serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
-      name: "filtro-aceite-bosch-toyota",
-      displayName: "Filtro de Aceite Bosch Toyota",
-      description: "Filtro de aceite original para vehículos Toyota",
-      activeFrom: "2024-02-10",
-      status: true,
-      categoryId: "cat-2",
-      categoryName: "Filtros",
-      packages: [
-        {
-          id: "pkg-3",
-          sku: "BOSCH-FO-TOY",
-          barcode: "7891234567892",
-          unitId: "unit-2",
-          unitName: "Unidad",
-          packageId: "pack-3",
-          packageName: "Caja Individual",
-          imageUrl: "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-          activeFrom: "2024-02-10",
-          status: true,
-          quantity: 1,
-        },
-      ],
-    },
-    {
-      id: "3",
-      brandId: "brand-3",
-      brandName: "Varta",
-      subcategoryId: "subcat-3",
-      subcategoryName: "Baterías Automotrices",
-      serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
-      name: "bateria-varta-12v-65ah",
-      displayName: "Batería Varta 12V 65Ah",
-      description: "Batería de alta durabilidad para vehículos livianos",
-      activeFrom: "2024-03-05",
-      status: false,
-      categoryId: "cat-3",
-      categoryName: "Baterías",
-      packages: [
-        {
-          id: "pkg-4",
-          sku: "VARTA-12V-65",
-          barcode: "7891234567893",
-          unitId: "unit-2",
-          unitName: "Unidad",
-          packageId: "pack-4",
-          packageName: "Caja con garantía",
-          imageUrl: "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-          activeFrom: "2024-03-05",
-          status: false,
-          quantity: 1,
-        },
-      ],
-    },
-    {
-      id: "4",
-      brandId: "brand-4",
-      brandName: "Bridgestone",
-      subcategoryId: "subcat-4",
-      subcategoryName: "Llantas Aro 16",
-      serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86",
-      name: "llanta-bridgestone-205-55-r16",
-      displayName: "Llanta Bridgestone 205/55R16",
-      description: "Llanta de alto rendimiento para sedanes",
-      activeFrom: "2025-10-20",
-      status: true,
-      categoryId: "cat-4",
-      categoryName: "Llantas",
-      packages: [
-        {
-          id: "pkg-5",
-          sku: "BRID-205-55-R16",
-          barcode: "7891234567894",
-          unitId: "unit-2",
-          unitName: "Unidad",
-          packageId: "pack-5",
-          packageName: "Llanta Individual",
-          imageUrl: "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-          activeFrom: "2025-10-20",
-          status: true,
-          quantity: 1,
-        },
-      ],
-    },
-  ];
-
   // Estados
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid"); // "grid" o "list"
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
@@ -155,40 +22,86 @@ const ProductCatalog = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Debounce para el término de búsqueda (espera 500ms después de que el usuario deje de escribir)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Cargar productos desde la API cuando cambia el término de búsqueda debounced
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await productApi.getCatalog(debouncedSearchTerm, 0, 100);
+
+        // Transformar la respuesta de la API al formato esperado por el componente
+        const transformedProducts = response.map((item) => ({
+          id: item.productId,
+          brandId: item.productId, // No hay brandId en la respuesta
+          brandName: item.brandName,
+          subcategoryId: item.productId, // No hay subcategoryId en la respuesta
+          subcategoryName: item.subCategoryName,
+          serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86", // Valor por defecto
+          name: item.productName.toLowerCase().replace(/\s+/g, '-'),
+          displayName: item.productName,
+          description: item.productName, // No hay descripción en la respuesta
+          activeFrom: new Date().toISOString().split('T')[0], // Fecha actual por defecto
+          status: true, // Por defecto activo
+          categoryId: item.productId, // No hay categoryId en la respuesta
+          categoryName: item.categoryName,
+          packages: item.packages.map((pkg) => ({
+            id: pkg.productPackageId,
+            sku: pkg.sku || '',
+            barcode: pkg.barcode || '',
+            unitId: pkg.productPackageId,
+            unitName: pkg.packageCodedName || 'Unidad',
+            packageId: pkg.productPackageId,
+            packageName: pkg.packageDescription || pkg.packageCodedName || 'Sin descripción',
+            imageUrl: pkg.imageUrl || 'https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000',
+            activeFrom: new Date().toISOString().split('T')[0],
+            status: true,
+            quantity: 1,
+          })),
+        }));
+
+        setProducts(transformedProducts);
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        Swal.fire("Error", "No se pudieron cargar los productos", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [debouncedSearchTerm]); // Se ejecuta cuando cambia el término de búsqueda debounced
+
   // Extraer opciones únicas para filtros
   const categories = useMemo(() => {
-    const unique = [...new Set(mockProducts.map((p) => p.categoryName))];
+    const unique = [...new Set(products.map((p) => p.categoryName))];
     return unique.sort();
-  }, []);
+  }, [products]);
 
   const brands = useMemo(() => {
-    const unique = [...new Set(mockProducts.map((p) => p.brandName))];
+    const unique = [...new Set(products.map((p) => p.brandName))];
     return unique.sort();
-  }, []);
+  }, [products]);
 
   const subcategories = useMemo(() => {
-    const unique = [...new Set(mockProducts.map((p) => p.subcategoryName))];
+    const unique = [...new Set(products.map((p) => p.subcategoryName))];
     return unique.sort();
-  }, []);
+  }, [products]);
 
   // Filtrar y ordenar productos
   const filteredProducts = useMemo(() => {
-    let filtered = mockProducts;
+    let filtered = products;
 
-    // Búsqueda
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (product) =>
-          product.displayName.toLowerCase().includes(term) ||
-          product.name.toLowerCase().includes(term) ||
-          product.packages.some(
-            (pkg) =>
-              pkg.sku.toLowerCase().includes(term) ||
-              pkg.barcode.includes(term)
-          )
-      );
-    }
+    // La búsqueda ahora se hace en el servidor via API (debouncedSearchTerm)
+    // Solo aplicamos filtros adicionales del lado del cliente
 
     // Filtros
     if (selectedCategory) {
@@ -230,7 +143,7 @@ const ProductCatalog = () => {
 
     return sorted;
   }, [
-    searchTerm,
+    products,
     selectedCategory,
     selectedBrand,
     selectedSubcategory,
@@ -322,6 +235,9 @@ const ProductCatalog = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
           />
+          {searchTerm !== debouncedSearchTerm && (
+            <span className={styles.searchingIndicator}>Buscando...</span>
+          )}
         </div>
 
         {/* Filtros */}
@@ -401,18 +317,16 @@ const ProductCatalog = () => {
           <div className={styles.viewToggle}>
             <button
               onClick={() => setViewMode("grid")}
-              className={`${styles.viewButton} ${
-                viewMode === "grid" ? styles.active : ""
-              }`}
+              className={`${styles.viewButton} ${viewMode === "grid" ? styles.active : ""
+                }`}
               title="Vista en cuadrícula"
             >
               ⊞
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`${styles.viewButton} ${
-                viewMode === "list" ? styles.active : ""
-              }`}
+              className={`${styles.viewButton} ${viewMode === "list" ? styles.active : ""
+                }`}
               title="Vista en lista"
             >
               ☰
@@ -426,44 +340,53 @@ const ProductCatalog = () => {
         {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
       </div>
 
-      {/* Grid o Lista de Productos */}
-      {filteredProducts.length > 0 ? (
-        <div
-          className={
-            viewMode === "grid" ? styles.productsGrid : styles.productsList
-          }
-        >
-          {filteredProducts.map((product) => (
-            viewMode === "grid" ? (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isNew={isNewProduct(product.activeFrom)}
-                onViewDetails={handleViewDetails}
-                onEdit={handleEdit}
-                onToggleStatus={handleToggleStatus}
-                onDelete={handleDelete}
-              />
-            ) : (
-              <ProductListItem
-                key={product.id}
-                product={product}
-                isNew={isNewProduct(product.activeFrom)}
-                onViewDetails={handleViewDetails}
-                onEdit={handleEdit}
-                onToggleStatus={handleToggleStatus}
-                onDelete={handleDelete}
-              />
-            )
-          ))}
+      {/* Loading State */}
+      {loading ? (
+        <div className={styles.emptyState}>
+          <p>Cargando productos...</p>
         </div>
       ) : (
-        <div className={styles.emptyState}>
-          <p>No se encontraron productos</p>
-          <p className={styles.emptyHint}>
-            Intenta ajustar los filtros o realizar una nueva búsqueda
-          </p>
-        </div>
+        <>
+          {/* Grid o Lista de Productos */}
+          {filteredProducts.length > 0 ? (
+            <div
+              className={
+                viewMode === "grid" ? styles.productsGrid : styles.productsList
+              }
+            >
+              {filteredProducts.map((product) => (
+                viewMode === "grid" ? (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isNew={isNewProduct(product.activeFrom)}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEdit}
+                    onToggleStatus={handleToggleStatus}
+                    onDelete={handleDelete}
+                  />
+                ) : (
+                  <ProductListItem
+                    key={product.id}
+                    product={product}
+                    isNew={isNewProduct(product.activeFrom)}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEdit}
+                    onToggleStatus={handleToggleStatus}
+                    onDelete={handleDelete}
+                  />
+                )
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <p>No se encontraron productos</p>
+              <p className={styles.emptyHint}>
+                Intenta ajustar los filtros o realizar una nueva búsqueda
+              </p>
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal de Detalles */}

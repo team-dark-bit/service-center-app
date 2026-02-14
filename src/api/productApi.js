@@ -31,14 +31,34 @@ const productApi = {
   // Obtener Units (para los selects)
   getUnits: () => axiosConfig.get('/units').then((res) => res.data.data),
 
-   // Obtener Purchases (para los selects)
+  // Obtener Purchases (para los selects)
   purchaseApi: () => axiosConfig.get('/units').then((res) => res.data.data),
 
 
-  searchProducts: (searchTerm, pageNumber = 0, pageSize = 10) => 
-    axiosConfig.get('/products', {
+  searchProducts: (searchTerm, pageNumber = 0, pageSize = 10) =>
+    axiosConfig.get('/products/purchase', {
       params: {
         input: searchTerm,
+        pageNumber: pageNumber,
+        pageSize: pageSize
+      }
+    }).then((res) => res.data.data),
+
+  // Obtener catálogo de productos
+  getCatalog: (input = '', pageNumber = 0, pageSize = 10) =>
+    axiosConfig.get('/products/catalog', {
+      params: {
+        input: input,
+        pageNumber: pageNumber,
+        pageSize: pageSize
+      }
+    }).then((res) => res.data.data),
+
+  // Obtener inventario de productos
+  getInventory: (input = '', pageNumber = 0, pageSize = 10) =>
+    axiosConfig.get('/products/inventory', {
+      params: {
+        input: input,
         pageNumber: pageNumber,
         pageSize: pageSize
       }
