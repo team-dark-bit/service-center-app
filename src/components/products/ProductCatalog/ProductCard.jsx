@@ -18,9 +18,8 @@ const ProductCard = ({
       {/* Badges superiores */}
       <div className={styles.cardBadges}>
         <span
-          className={`${styles.badge} ${styles.badgeStatus} ${
-            product.status ? styles.badgeActive : styles.badgeInactive
-          }`}
+          className={`${styles.badge} ${styles.badgeStatus} ${product.status ? styles.badgeActive : styles.badgeInactive
+            }`}
         >
           {product.status ? "Activo" : "Inactivo"}
         </span>
@@ -30,7 +29,12 @@ const ProductCard = ({
       </div>
 
       {/* Imagen */}
-      <div className={styles.cardImageContainer}>
+      <div
+        className={styles.cardImageContainer}
+        onClick={() => onViewDetails(product)}
+        style={{ cursor: 'pointer' }}
+        title="Ver detalles"
+      >
         {!imageError ? (
           <img
             src={firstPackage?.imageUrl}

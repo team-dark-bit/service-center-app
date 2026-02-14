@@ -16,7 +16,12 @@ const ProductListItem = ({
   return (
     <div className={styles.listItem}>
       {/* Imagen */}
-      <div className={styles.listImageContainer}>
+      <div
+        className={styles.listImageContainer}
+        onClick={() => onViewDetails(product)}
+        style={{ cursor: 'pointer' }}
+        title="Ver detalles"
+      >
         {!imageError ? (
           <img
             src={firstPackage?.imageUrl}
@@ -40,9 +45,8 @@ const ProductListItem = ({
           </div>
           <div className={styles.listBadges}>
             <span
-              className={`${styles.badge} ${styles.badgeStatus} ${
-                product.status ? styles.badgeActive : styles.badgeInactive
-              }`}
+              className={`${styles.badge} ${styles.badgeStatus} ${product.status ? styles.badgeActive : styles.badgeInactive
+                }`}
             >
               {product.status ? "Activo" : "Inactivo"}
             </span>
