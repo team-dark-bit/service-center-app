@@ -49,6 +49,7 @@
 /* Búsqueda */
 .searchContainer {
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .searchInput {
@@ -66,6 +67,29 @@
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
   background: white;
+}
+
+.searchingIndicator {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #007bff;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Filtros */
@@ -180,32 +204,24 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
+  min-height: 600px;
 }
 
-@media (min-width: 1800px) {
+/* 5 columnas en pantallas grandes y medianas */
+@media (min-width: 1200px) {
   .productsGrid {
     grid-template-columns: repeat(5, 1fr);
   }
 }
 
-@media (min-width: 1400px) and (max-width: 1799px) {
-  .productsGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1200px) and (max-width: 1399px) {
-  .productsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
+/* 2 columnas en tablets */
 @media (min-width: 768px) and (max-width: 1199px) {
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+/* 1 columna en móviles */
 @media (max-width: 767px) {
   .productsGrid {
     grid-template-columns: 1fr;
@@ -394,6 +410,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 600px;
 }
 
 .listItem {
