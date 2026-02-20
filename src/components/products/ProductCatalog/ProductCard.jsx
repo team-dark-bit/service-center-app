@@ -3,10 +3,8 @@ import styles from "./ProductCatalog.module.css";
 
 const ProductCard = ({
   product,
-  isNew,
   onViewDetails,
   onEdit,
-  onToggleStatus,
   onDelete,
 }) => {
   const [imageError, setImageError] = useState(false);
@@ -16,16 +14,9 @@ const ProductCard = ({
   return (
     <div className={styles.productCard}>
       {/* Badges superiores */}
+      {/* Badges superiores - Removed Status and New badges */}
       <div className={styles.cardBadges}>
-        <span
-          className={`${styles.badge} ${styles.badgeStatus} ${product.status ? styles.badgeActive : styles.badgeInactive
-            }`}
-        >
-          {product.status ? "Activo" : "Inactivo"}
-        </span>
-        {isNew && (
-          <span className={`${styles.badge} ${styles.badgeNew}`}>Nuevo</span>
-        )}
+        {/* No active/new badges anymore */}
       </div>
 
       {/* Imagen */}
@@ -53,8 +44,9 @@ const ProductCard = ({
       {/* Información del producto */}
       <div className={styles.cardContent}>
         <h3 className={styles.cardTitle}>{product.displayName}</h3>
-        <p className={styles.cardSubtitle}>{product.name}</p>
+        {/* Subtitle removed */}
 
+        {/* 
         <div className={styles.cardDetails}>
           <p className={styles.cardSku}>
             <strong>SKU:</strong> {firstPackage?.sku}
@@ -63,7 +55,7 @@ const ProductCard = ({
             <strong>Código:</strong> {firstPackage?.barcode}
           </p>
         </div>
-
+        */}
         <div className={styles.cardTags}>
           <span className={`${styles.badge} ${styles.badgeBrand}`}>
             {product.brandName}
@@ -88,7 +80,7 @@ const ProductCard = ({
 
         <div className={styles.cardPackageInfo}>
           <span>
-            📦 {firstPackage?.quantity} {firstPackage?.unitName}
+            {firstPackage?.unitName}
           </span>
         </div>
       </div>
@@ -109,13 +101,7 @@ const ProductCard = ({
         >
           ✏️
         </button>
-        <button
-          onClick={() => onToggleStatus(product)}
-          className={`${styles.actionButton} ${styles.actionToggle}`}
-          title={product.status ? "Desactivar" : "Activar"}
-        >
-          {product.status ? "🔒" : "🔓"}
-        </button>
+
         <button
           onClick={() => onDelete(product)}
           className={`${styles.actionButton} ${styles.actionDelete}`}
