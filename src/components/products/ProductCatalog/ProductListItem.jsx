@@ -3,10 +3,8 @@ import styles from "./ProductCatalog.module.css";
 
 const ProductListItem = ({
   product,
-  isNew,
   onViewDetails,
   onEdit,
-  onToggleStatus,
   onDelete,
 }) => {
   const [imageError, setImageError] = useState(false);
@@ -41,20 +39,10 @@ const ProductListItem = ({
         <div className={styles.listHeader}>
           <div>
             <h3 className={styles.listTitle}>{product.displayName}</h3>
-            <p className={styles.listSubtitle}>{product.name}</p>
+            {/* Subtitle removed */}
           </div>
           <div className={styles.listBadges}>
-            <span
-              className={`${styles.badge} ${styles.badgeStatus} ${product.status ? styles.badgeActive : styles.badgeInactive
-                }`}
-            >
-              {product.status ? "Activo" : "Inactivo"}
-            </span>
-            {isNew && (
-              <span className={`${styles.badge} ${styles.badgeNew}`}>
-                Nuevo
-              </span>
-            )}
+            {/* Status and New badges removed */}
           </div>
         </div>
 
@@ -109,13 +97,7 @@ const ProductListItem = ({
         >
           ✏️ Editar
         </button>
-        <button
-          onClick={() => onToggleStatus(product)}
-          className={`${styles.actionButton} ${styles.actionToggle}`}
-          title={product.status ? "Desactivar" : "Activar"}
-        >
-          {product.status ? "🔒 Desactivar" : "🔓 Activar"}
-        </button>
+
         <button
           onClick={() => onDelete(product)}
           className={`${styles.actionButton} ${styles.actionDelete}`}

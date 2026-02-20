@@ -18,7 +18,7 @@ const ProductCatalog = () => {
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all"); // "all", "active", "inactive"
-  const [sortBy, setSortBy] = useState("recent"); // "recent", "name-asc", "name-desc", "brand", "category"
+  const [sortBy, setSortBy] = useState("name-asc"); // "name-asc", "name-desc", "brand", "category"
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -41,30 +41,17 @@ const ProductCatalog = () => {
         // Transformar la respuesta de la API al formato esperado por el componente
         const transformedProducts = response.map((item) => ({
           id: item.productId,
-          brandId: item.productId, // No hay brandId en la respuesta
           brandName: item.brandName,
-          subcategoryId: item.productId, // No hay subcategoryId en la respuesta
           subcategoryName: item.subCategoryName,
-          serviceCenterId: "f80ac9d5-a6d3-4e45-b800-6eb102abba86", // Valor por defecto
-          name: item.productName.toLowerCase().replace(/\s+/g, '-'),
           displayName: item.productName,
-          description: item.productName, // No hay descripción en la respuesta
-          activeFrom: new Date().toISOString().split('T')[0], // Fecha actual por defecto
-          status: true, // Por defecto activo
-          categoryId: item.productId, // No hay categoryId en la respuesta
           categoryName: item.categoryName,
           packages: item.packages.map((pkg) => ({
             id: pkg.productPackageId,
             sku: pkg.sku || '',
             barcode: pkg.barcode || '',
-            unitId: pkg.productPackageId,
             unitName: pkg.packageCodedName || 'Unidad',
-            packageId: pkg.productPackageId,
             packageName: pkg.packageDescription || pkg.packageCodedName || 'Sin descripción',
             imageUrl: pkg.imageUrl || 'https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000',
-            activeFrom: new Date().toISOString().split('T')[0],
-            status: true,
-            quantity: 1,
           })),
         }));
 
@@ -113,18 +100,12 @@ const ProductCatalog = () => {
     if (selectedSubcategory) {
       filtered = filtered.filter((p) => p.subcategoryName === selectedSubcategory);
     }
-    if (selectedStatus !== "all") {
-      filtered = filtered.filter((p) =>
-        selectedStatus === "active" ? p.status : !p.status
-      );
-    }
+    // Status filter removed
 
     // Ordenamiento
     const sorted = [...filtered];
     switch (sortBy) {
-      case "recent":
-        sorted.sort((a, b) => new Date(b.activeFrom) - new Date(a.activeFrom));
-        break;
+      // Recent sort removed
       case "name-asc":
         sorted.sort((a, b) => a.displayName.localeCompare(b.displayName));
         break;
@@ -158,7 +139,7 @@ const ProductCatalog = () => {
     setSelectedBrand("");
     setSelectedSubcategory("");
     setSelectedStatus("all");
-    setSortBy("recent");
+    setSortBy("name-asc");
   };
 
   // Ver detalles del producto
@@ -172,21 +153,7 @@ const ProductCatalog = () => {
     Swal.fire("Editar", `Editar producto: ${product.displayName}`, "info");
   };
 
-  // Cambiar estado
-  const handleToggleStatus = (product) => {
-    Swal.fire({
-      title: product.status ? "¿Desactivar producto?" : "¿Activar producto?",
-      text: product.displayName,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Sí",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire("Éxito", "Estado actualizado", "success");
-      }
-    });
-  };
+
 
   // Eliminar producto
   const handleDelete = (product) => {
@@ -205,14 +172,7 @@ const ProductCatalog = () => {
     });
   };
 
-  // Verificar si es producto nuevo (< 30 días)
-  const isNewProduct = (activeFrom) => {
-    const now = new Date();
-    const productDate = new Date(activeFrom);
-    const diffTime = Math.abs(now - productDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 30;
-  };
+
 
   return (
     <div className={styles.container}>
@@ -281,15 +241,7 @@ const ProductCatalog = () => {
             ))}
           </select>
 
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="all">Todos los estados</option>
-            <option value="active">Activos</option>
-            <option value="inactive">Inactivos</option>
-          </select>
+
         </div>
 
         {/* Ordenamiento y Vista */}
@@ -299,7 +251,7 @@ const ProductCatalog = () => {
             onChange={(e) => setSortBy(e.target.value)}
             className={styles.sortSelect}
           >
-            <option value="recent">Más recientes</option>
+            <option value="name-asc">Nombre (A-Z)</option>
             <option value="name-asc">Nombre (A-Z)</option>
             <option value="name-desc">Nombre (Z-A)</option>
             <option value="brand">Por marca</option>
@@ -359,20 +311,16 @@ const ProductCatalog = () => {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    isNew={isNewProduct(product.activeFrom)}
                     onViewDetails={handleViewDetails}
                     onEdit={handleEdit}
-                    onToggleStatus={handleToggleStatus}
                     onDelete={handleDelete}
                   />
                 ) : (
                   <ProductListItem
                     key={product.id}
                     product={product}
-                    isNew={isNewProduct(product.activeFrom)}
                     onViewDetails={handleViewDetails}
                     onEdit={handleEdit}
-                    onToggleStatus={handleToggleStatus}
                     onDelete={handleDelete}
                   />
                 )
@@ -406,11 +354,7 @@ const ProductCatalog = () => {
               />
               <div className={styles.modalInfo}>
                 <h2>{selectedProduct.displayName}</h2>
-                <p className={styles.modalSubtitle}>{selectedProduct.name}</p>
                 <div className={styles.modalBadges}>
-                  <span className={`${styles.badge} ${styles.badgeStatus} ${selectedProduct.status ? styles.badgeActive : styles.badgeInactive}`}>
-                    {selectedProduct.status ? "Activo" : "Inactivo"}
-                  </span>
                   <span className={`${styles.badge} ${styles.badgeCategory}`}>
                     {selectedProduct.categoryName}
                   </span>
@@ -421,12 +365,6 @@ const ProductCatalog = () => {
                     {selectedProduct.subcategoryName}
                   </span>
                 </div>
-                <p className={styles.modalDescription}>
-                  {selectedProduct.description}
-                </p>
-                <p className={styles.modalDate}>
-                  Activo desde: {new Date(selectedProduct.activeFrom).toLocaleDateString()}
-                </p>
               </div>
             </div>
 
@@ -441,8 +379,6 @@ const ProductCatalog = () => {
                     <th>Código de Barras</th>
                     <th>Unidad</th>
                     <th>Empaque</th>
-                    <th>Cantidad</th>
-                    <th>Estado</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -452,12 +388,6 @@ const ProductCatalog = () => {
                       <td>{pkg.barcode}</td>
                       <td>{pkg.unitName}</td>
                       <td>{pkg.packageName}</td>
-                      <td>{pkg.quantity}</td>
-                      <td>
-                        <span className={`${styles.badge} ${pkg.status ? styles.badgeActive : styles.badgeInactive}`}>
-                          {pkg.status ? "Activo" : "Inactivo"}
-                        </span>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
