@@ -207,26 +207,27 @@
   min-height: 600px;
 }
 
-/* 5 columnas en pantallas grandes y medianas */
+/* 4 columnas en pantallas grandes y medianas */
 @media (min-width: 1200px) {
   .productsGrid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 /* 2 columnas en tablets */
 @media (min-width: 768px) and (max-width: 1199px) {
   .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 /* 1 columna en móviles */
 @media (max-width: 767px) {
   .productsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
+
 
 /* Tarjeta de Producto */
 .productCard {
@@ -239,6 +240,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
+  /* For clipping the sliding actions */
 }
 
 .productCard:hover {
@@ -301,11 +304,13 @@
   font-size: 1.05rem;
   font-weight: 600;
   color: #2c3e50;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.25rem 0;
+  /* Reduced margin */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   min-height: 2.8em;
   line-height: 1.4;
@@ -314,15 +319,18 @@
 .cardSubtitle {
   font-size: 0.85rem;
   color: #6c757d;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.25rem 0;
+  /* Reduced margin */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .cardDetails {
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
+  /* Reduced margin */
+  padding-bottom: 0.25rem;
+  /* Reduced padding */
   border-bottom: 1px solid #e9ecef;
 }
 
@@ -341,12 +349,15 @@
 .cardTags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: 0.25rem;
+  /* Reduced gap */
+  margin-bottom: 0.25rem;
+  /* Reduced margin */
 }
 
 .packageIndicator {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
+  /* Reduced margin */
 }
 
 .cardPackageInfo {
@@ -358,12 +369,29 @@
 }
 
 /* Acciones */
+/* Acciones - Hover Effect */
 .cardActions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 2px solid #e9ecef;
+  margin-top: auto;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid #e9ecef;
+
+  /* Position absolute at bottom */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  /* Initial state: hidden (moved down) */
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+}
+
+.productCard:hover .cardActions {
+  transform: translateY(0);
 }
 
 .actionButton {
@@ -527,6 +555,10 @@
   font-weight: 600;
   border-radius: 6px;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
 .badgeStatus {
@@ -557,6 +589,8 @@
 .badgeCategory {
   background: #cfe2ff;
   color: #084298;
+  max-width: 150px;
+  /* Limit category badge width */
 }
 
 .badgeSubcategory {
