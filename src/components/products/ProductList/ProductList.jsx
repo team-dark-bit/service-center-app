@@ -6,25 +6,53 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  // Debounce para el término de búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [debouncedSearchTerm]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const data = await productApi.getInventory();
+      const data = await productApi.getInventory(debouncedSearchTerm);
 
-      const mappedProducts = data.map(item => ({
-        id: item.productId,
-        name: item.productName,
-        price: item.saleUnitPrice,
-        stock: item.stock,
-        image: item.imageUrl || "https://bateriasaltoque.pe/wp-content/uploads/2021/05/YTX9-BSprueba-1.jpg", // Fallback image if null
-        brand: item.brandName,
-        category: item.categoryName
-      }));
+      const mappedProducts = [];
+
+      data.forEach(product => {
+        if (product.packages && product.packages.length > 0) {
+          product.packages.forEach(pkg => {
+            // Calcular stock total de los lotes
+            const totalStock = pkg.batches ? pkg.batches.reduce((sum, batch) => sum + batch.quantityAvailable, 0) : 0;
+
+            // Obtener precio del PRIMER lote (como solicitó el usuario)
+            const firstBatch = pkg.batches && pkg.batches.length > 0 ? pkg.batches[0] : null;
+            const price = firstBatch ? firstBatch.saleUnitPrice : 0;
+
+            mappedProducts.push({
+              id: pkg.productPackageId, // Usamos el ID del paquete como key única en la lista
+              productId: product.productId,
+              name: product.productName,
+              packageName: pkg.packageCodedName, // Opcional: mostrar nombre del paquete si es relevante
+              price: price,
+              stock: totalStock,
+              image: pkg.imageUrl || "https://bateriasaltoque.pe/wp-content/uploads/2021/05/YTX9-BSprueba-1.jpg",
+              brand: product.brandName,
+              category: product.categoryName
+            });
+          });
+        }
+      });
 
       setProducts(mappedProducts);
       setLoading(false);
@@ -69,6 +97,20 @@ const ProductList = () => {
         <p className={styles.subtitle}>
           {products.length} producto{products.length !== 1 ? "s" : ""} disponible{products.length !== 1 ? "s" : ""}
         </p>
+      </div>
+
+      {/* Barra de Búsqueda */}
+      <div className={styles.searchContainer}>
+        <input
+          type="text"
+          placeholder="Buscar producto por nombre..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.searchInput}
+        />
+        {searchTerm !== debouncedSearchTerm && (
+          <span className={styles.searchingIndicator}>Buscando...</span>
+        )}
       </div>
 
       <div className={styles.grid}>
