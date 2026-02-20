@@ -27,7 +27,7 @@ const CreatePurchase = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    purchaseNumber: "",
+
     providerId: "",
     date: getTodayDate(),
     documentTypeId: "",
@@ -104,19 +104,19 @@ const CreatePurchase = () => {
     );
 
     return {
-      purchaseNumber: formData.purchaseNumber,
-      supplierId: formData.providerId, 
-      purchaseDate: new Date(formData.date).toISOString(), 
-      receiptType: selectedDocType ? selectedDocType.name : "", 
+
+      supplierId: formData.providerId,
+      purchaseDate: new Date(formData.date).toISOString(),
+      receiptType: selectedDocType ? selectedDocType.name : "",
       receiptNumber: formData.documentNumber,
-      totalAmount: parseFloat(calculateTotal()), 
+      totalAmount: parseFloat(calculateTotal()),
       products: purchaseItems.map((item) => ({
         productId: item.id,
-        productPackageId: item.productPackageId, 
-        quantity: item.quantity.toString(), 
-        purchaseUnitPrice: item.purchasePrice.toFixed(2), 
-        saleUnitPrice: item.salePrice.toFixed(2), 
-        subtotal: item.importe.toFixed(2), 
+        productPackageId: item.productPackageId,
+        quantity: item.quantity.toString(),
+        purchaseUnitPrice: item.purchasePrice.toFixed(2),
+        saleUnitPrice: item.salePrice.toFixed(2),
+        subtotal: item.importe.toFixed(2),
       })),
     };
   };
@@ -141,13 +141,13 @@ const CreatePurchase = () => {
     }
 
 
-    console.log("Productos en la tabla:", purchaseItems); 
+    console.log("Productos en la tabla:", purchaseItems);
 
     const hasInvalidProducts = purchaseItems.some(
       (item) => !item.productPackageId
     );
 
-    console.log("¿Hay productos inválidos?", hasInvalidProducts); 
+    console.log("¿Hay productos inválidos?", hasInvalidProducts);
 
     if (hasInvalidProducts) {
       Swal.fire(
@@ -193,7 +193,7 @@ const CreatePurchase = () => {
 
   const resetForm = () => {
     setFormData({
-      purchaseNumber: "",
+
       providerId: "",
       date: getTodayDate(),
       documentTypeId: "",
@@ -219,18 +219,7 @@ const CreatePurchase = () => {
             <h3 className={styles.sectionTitle}>Información de la Compra</h3>
 
             <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>N° Compra:</label>
-                <input
-                  type="text"
-                  name="purchaseNumber"
-                  value={formData.purchaseNumber}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  placeholder="Ingrese número de compra"
-                  required
-                />
-              </div>
+
 
               <SearchSelect
                 label="Proveedor"
@@ -246,6 +235,19 @@ const CreatePurchase = () => {
                 placeholder="Buscar proveedor..."
                 required
               />
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>N° Comprobante:</label>
+                <input
+                  type="text"
+                  name="documentNumber"
+                  value={formData.documentNumber}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                  placeholder="Número del comprobante"
+                  required
+                />
+              </div>
             </div>
 
             <div className={styles.formRow}>
@@ -279,21 +281,6 @@ const CreatePurchase = () => {
                 </select>
               </div>
             </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>N° Comprobante:</label>
-                <input
-                  type="text"
-                  name="documentNumber"
-                  value={formData.documentNumber}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  placeholder="Número del comprobante"
-                  required
-                />
-              </div>
-            </div>
           </div>
 
           {/* Sección de productos */}
@@ -315,7 +302,7 @@ const CreatePurchase = () => {
                   <ul className={styles.dropdown}>
                     {filteredProducts.map((product) => (
                       <li
-                        key={product.productId} 
+                        key={product.productId}
                         onClick={() => handleSelectProduct(product)}
                         className={styles.dropdownItem}
                       >
