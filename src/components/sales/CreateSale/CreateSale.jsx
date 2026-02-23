@@ -7,6 +7,7 @@ import Select from "@/components/common/Select";
 import styles from "./CreateSale.module.css";
 import { getTodayDate } from "@/utils/date-utils";
 import customerApi from "@/api/customerApi";
+import productApi from "@/api/productApi";
 import SearchSelect from "@/components/common/SearchSelect";
 
 const CreateSale = () => {
@@ -28,103 +29,14 @@ const CreateSale = () => {
     { id: "CEX", name: "CEX", maxLength: 20 },
   ];
 
-  // Mock de productos
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Aceite de Motor Castrol 20W-50",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 25,
-      purchasePrice: 65.0,
-      salePrice: 89.0,
-    },
-    {
-      id: 2,
-      name: "Filtro de Aceite Toyota",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 150,
-      purchasePrice: 30.0,
-      salePrice: 45.5,
-    },
-    {
-      id: 3,
-      name: "Batería 12V 65Ah",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 8,
-      purchasePrice: 280.0,
-      salePrice: 350.0,
-    },
-    {
-      id: 4,
-      name: "Llanta Bridgestone 205/55R16",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 32,
-      purchasePrice: 220.0,
-      salePrice: 280.0,
-    },
-    {
-      id: 5,
-      name: "Pastillas de Freno Nissan",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 45,
-      purchasePrice: 85.0,
-      salePrice: 120.0,
-    },
-    {
-      id: 6,
-      name: "Amortiguador Delantero",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 12,
-      purchasePrice: 145.0,
-      salePrice: 195.0,
-    },
-    {
-      id: 7,
-      name: "Bujías NGK Platino Set x4",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 200,
-      purchasePrice: 45.0,
-      salePrice: 65.0,
-    },
-    {
-      id: 8,
-      name: "Radiador Aluminio Universal",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 5,
-      purchasePrice: 320.0,
-      salePrice: 450.0,
-    },
-    {
-      id: 9,
-      name: "Kit de Embrague Completo",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 15,
-      purchasePrice: 380.0,
-      salePrice: 520.0,
-    },
-    {
-      id: 10,
-      name: "Espejo Retrovisor Derecho",
-      imageUrl:
-        "https://plazavea.vteximg.com.br/arquivos/ids/30489250-450-450/141848.jpg?v=638740742006030000",
-      stock: 18,
-      purchasePrice: 95.0,
-      salePrice: 135.0,
-    },
-  ];
+  // Mock de productos (deprecated)
+  const mockProducts = [];
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const [allClients, setAllClients] = useState([]);
   const dropdownRef = useRef(null);
@@ -186,22 +98,67 @@ const CreateSale = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Búsqueda de productos
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+  // Debounce para búsqueda de productos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
 
-    if (value.trim() === "" || value.length < 2) {
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Efecto para buscar productos cuando cambia el término debounced
+  useEffect(() => {
+    if (debouncedSearchTerm.trim() === "" || debouncedSearchTerm.length < 2) {
       setFilteredProducts([]);
       setShowDropdown(false);
       return;
     }
 
-    const results = mockProducts.filter((product) =>
-      product.name.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredProducts(results);
-    setShowDropdown(true);
+    const fetchProducts = async () => {
+      try {
+        setIsSearchingProducts(true);
+        const data = await productApi.getInventory(debouncedSearchTerm);
+
+        const mappedResults = [];
+        data.forEach(product => {
+          if (product.packages && product.packages.length > 0) {
+            product.packages.forEach(pkg => {
+              // Calcular stock total de los lotes
+              const totalStock = pkg.batches ? pkg.batches.reduce((sum, batch) => sum + batch.quantityAvailable, 0) : 0;
+
+              // Obtener precios del PRIMER lote (preferiblemente el más antiguo o según lógica de negocio)
+              const firstBatch = pkg.batches && pkg.batches.length > 0 ? pkg.batches[0] : null;
+              const salePrice = firstBatch ? firstBatch.saleUnitPrice : 0;
+              const purchasePrice = firstBatch ? firstBatch.purchaseUnitPrice : 0;
+
+              mappedResults.push({
+                id: pkg.productPackageId,
+                name: `${product.productName} (${pkg.packageCodedName})`,
+                imageUrl: pkg.imageUrl || "https://bateriasaltoque.pe/wp-content/uploads/2021/05/YTX9-BSprueba-1.jpg",
+                stock: totalStock,
+                purchasePrice: purchasePrice,
+                salePrice: salePrice,
+              });
+            });
+          }
+        });
+
+        setFilteredProducts(mappedResults);
+        setShowDropdown(true);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setIsSearchingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, [debouncedSearchTerm]);
+
+  // Búsqueda de productos
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   const handleSelectProduct = (product) => {
@@ -474,6 +431,9 @@ const CreateSale = () => {
             onChange={handleSearchChange}
             className={styles.searchInput}
           />
+          {isSearchingProducts && (
+            <div className={styles.searchingIndicator}>Buscando...</div>
+          )}
 
           {showDropdown && filteredProducts.length > 0 && (
             <ul className={styles.searchDropdown}>
@@ -780,11 +740,9 @@ const CreateSale = () => {
               value={clientModalData.documentNumber}
               onChange={handleClientModalInputChange}
               className={styles.input}
-              placeholder={`Ingrese ${
-                clientModalData.documentType
-              } (${getMaxLength()} dígitos${
-                clientModalData.documentType === "CEX" ? " máx." : ""
-              })`}
+              placeholder={`Ingrese ${clientModalData.documentType
+                } (${getMaxLength()} dígitos${clientModalData.documentType === "CEX" ? " máx." : ""
+                })`}
               maxLength={getMaxLength()}
             />
             {clientModalErrors.documentNumber && (
@@ -819,25 +777,25 @@ const CreateSale = () => {
           {/* Campo condicional: Nombre Completo (solo para DNI y CEX) */}
           {(clientModalData.documentType === "DNI" ||
             clientModalData.documentType === "CEX") && (
-            <div className={styles.formGroup}>
-              <label className={styles.label}>
-                Nombre Completo <span style={{ color: "red" }}>*</span>
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={clientModalData.fullName}
-                onChange={handleClientModalInputChange}
-                className={styles.input}
-                placeholder="Ingrese el nombre completo"
-              />
-              {clientModalErrors.fullName && (
-                <span style={{ color: "red", fontSize: "0.85rem" }}>
-                  {clientModalErrors.fullName}
-                </span>
-              )}
-            </div>
-          )}
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Nombre Completo <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={clientModalData.fullName}
+                  onChange={handleClientModalInputChange}
+                  className={styles.input}
+                  placeholder="Ingrese el nombre completo"
+                />
+                {clientModalErrors.fullName && (
+                  <span style={{ color: "red", fontSize: "0.85rem" }}>
+                    {clientModalErrors.fullName}
+                  </span>
+                )}
+              </div>
+            )}
 
           {/* Teléfono */}
           <Input
