@@ -289,53 +289,52 @@ const ProductCatalog = () => {
 
       {/* Contador de resultados */}
       <div className={styles.resultsCount}>
-        {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
+        {loading ? (
+          "Buscando productos..."
+        ) : (
+          `${filteredProducts.length} producto${filteredProducts.length !== 1 ? "s" : ""} encontrado${filteredProducts.length !== 1 ? "s" : ""}`
+        )}
       </div>
 
-      {/* Loading State */}
-      {loading ? (
-        <div className={styles.emptyState}>
-          <p>Cargando productos...</p>
-        </div>
-      ) : (
-        <>
-          {/* Grid o Lista de Productos */}
-          {filteredProducts.length > 0 ? (
-            <div
-              className={
-                viewMode === "grid" ? styles.productsGrid : styles.productsList
-              }
-            >
-              {filteredProducts.map((product) => (
-                viewMode === "grid" ? (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onViewDetails={handleViewDetails}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                ) : (
-                  <ProductListItem
-                    key={product.id}
-                    product={product}
-                    onViewDetails={handleViewDetails}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                )
-              ))}
-            </div>
-          ) : (
+      <div className={`${styles.resultsArea} ${loading ? styles.loadingEffect : ""}`}>
+        {/* Grid o Lista de Productos */}
+        {filteredProducts.length > 0 ? (
+          <div
+            className={
+              viewMode === "grid" ? styles.productsGrid : styles.productsList
+            }
+          >
+            {filteredProducts.map((product) => (
+              viewMode === "grid" ? (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onViewDetails={handleViewDetails}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ) : (
+                <ProductListItem
+                  key={product.id}
+                  product={product}
+                  onViewDetails={handleViewDetails}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )
+            ))}
+          </div>
+        ) : (
+          !loading && (
             <div className={styles.emptyState}>
               <p>No se encontraron productos</p>
               <p className={styles.emptyHint}>
                 Intenta ajustar los filtros o realizar una nueva búsqueda
               </p>
             </div>
-          )}
-        </>
-      )}
+          )
+        )}
+      </div>
 
       {/* Modal de Detalles */}
       {selectedProduct && (
