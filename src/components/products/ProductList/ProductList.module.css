@@ -128,9 +128,12 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  height: 70%;
+  height: auto;
+  /* Changed from 70% to auto to prevent odd sizing with padding */
   display: flex;
   flex-direction: column;
+  padding: 8px;
+  /* Added separation */
 }
 
 .card:hover {
@@ -142,10 +145,12 @@
 .imageContainer {
   position: relative;
   width: 100%;
-  padding-top: 75%;
+  padding-top: 100%;
   /* Aspect ratio 4:3 */
   overflow: hidden;
   background: #f0f2f5;
+  border-radius: 8px;
+  /* Rounded corners for the image itself */
 }
 
 .image {
