@@ -67,6 +67,23 @@
   background: white;
 }
 
+.searchingIndicator {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #007bff;
+  font-weight: 500;
+  animation: pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* Dropdown de búsqueda */
 .searchDropdown {
   position: absolute;
