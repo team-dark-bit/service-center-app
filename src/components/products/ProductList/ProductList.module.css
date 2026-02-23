@@ -45,6 +45,18 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
+  min-height: 400px;
+  /* Ensure grid doesn't collapse */
+}
+
+.resultsArea {
+  position: relative;
+  transition: opacity 0.3s ease;
+}
+
+.loadingEffect {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 /* Búsqueda */
@@ -116,9 +128,12 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  height: 100%;
+  height: auto;
+  /* Changed from 70% to auto to prevent odd sizing with padding */
   display: flex;
   flex-direction: column;
+  padding: 8px;
+  /* Added separation */
 }
 
 .card:hover {
@@ -130,10 +145,12 @@
 .imageContainer {
   position: relative;
   width: 100%;
-  padding-top: 75%;
+  padding-top: 100%;
   /* Aspect ratio 4:3 */
   overflow: hidden;
   background: #f0f2f5;
+  border-radius: 8px;
+  /* Rounded corners for the image itself */
 }
 
 .image {
@@ -180,7 +197,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: #1c1e21;
-  margin: 0 0 12px 0;
+  margin: 0 0 4px 0;
   line-height: 1.4;
   height: 2.8em;
   overflow: hidden;
@@ -192,7 +209,7 @@
 
 /* Card Footer */
 .cardFooter {
-  margin-top: auto;
+  margin-top: 4px;
 }
 
 .price {
