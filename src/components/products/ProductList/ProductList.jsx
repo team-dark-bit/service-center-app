@@ -69,33 +69,14 @@ const ProductList = () => {
     // navigate(`/products/${productId}`);
   };
 
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
-          <p>Cargando productos...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.errorContainer}>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Productos Disponibles</h1>
         <p className={styles.subtitle}>
-          {products.length} producto{products.length !== 1 ? "s" : ""} disponible{products.length !== 1 ? "s" : ""}
+          {loading ? "Cargando..." : (
+            `${products.length} producto${products.length !== 1 ? "s" : ""} disponible${products.length !== 1 ? "s" : ""}`
+          )}
         </p>
       </div>
 
@@ -113,40 +94,48 @@ const ProductList = () => {
         )}
       </div>
 
-      <div className={styles.grid}>
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className={styles.card}
-            onClick={() => handleProductClick(product.id)}
-          >
-            <div className={styles.imageContainer}>
-              <img
-                src={product.image}
-                alt={product.name}
-                className={styles.image}
-              />
-              <div className={styles.stockBadge}>
-                <span className={styles.stockText}>
-                  Stock: {product.stock}
-                </span>
-              </div>
-            </div>
+      {error ? (
+        <div className={styles.errorContainer}>
+          <p>{error}</p>
+        </div>
+      ) : (
+        <div className={`${styles.resultsArea} ${loading ? styles.loadingEffect : ""}`}>
+          <div className={styles.grid}>
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className={styles.card}
+                onClick={() => handleProductClick(product.id)}
+              >
+                <div className={styles.imageContainer}>
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className={styles.image}
+                  />
+                  <div className={styles.stockBadge}>
+                    <span className={styles.stockText}>
+                      Stock: {product.stock}
+                    </span>
+                  </div>
+                </div>
 
-            <div className={styles.cardContent}>
-              <h3 className={styles.productName}>{product.name}</h3>
+                <div className={styles.cardContent}>
+                  <h3 className={styles.productName}>{product.name}</h3>
 
-              <div className={styles.cardFooter}>
-                <span className={styles.price}>S/{product.price.toFixed(2)}</span>
+                  <div className={styles.cardFooter}>
+                    <span className={styles.price}>S/{product.price.toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {products.length === 0 && (
-        <div className={styles.emptyState}>
-          <p>No hay productos disponibles</p>
+          {!loading && products.length === 0 && (
+            <div className={styles.emptyState}>
+              <p>No hay productos disponibles</p>
+            </div>
+          )}
         </div>
       )}
     </div>
