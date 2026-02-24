@@ -191,13 +191,16 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  /* Center everything within the content area */
 }
 
 .productName {
   font-size: 1rem;
   font-weight: 600;
   color: #1c1e21;
-  margin: 0 0 4px 0;
+  margin: 0 0 8px 0;
+  /* Slightly more margin */
   line-height: 1.4;
   height: 2.8em;
   overflow: hidden;
@@ -205,18 +208,101 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+  text-align: center;
+  /* Center product name */
 }
 
 /* Card Footer */
 .cardFooter {
   margin-top: 4px;
+  width: 100%;
+  /* Ensure footer takes full width for alignment */
 }
 
-.price {
-  font-size: 1.25rem;
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.priceLabel {
+  font-size: 0.85rem;
+  color: #65676b;
+}
+
+.priceValue {
+  font-size: 1.15rem;
   font-weight: 700;
+  color: #28a745;
+  /* Green for Sale Price */
+}
+
+.batchesBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid #e5e7eb;
   color: #1877f2;
-  display: block;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.batchesBadge:hover {
+  background: #1877f2;
+  color: white;
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3);
+}
+
+.purchasePriceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.purchasePriceLabel {
+  font-size: 0.8rem;
+  color: #65676b;
+}
+
+.purchasePriceValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f0cb9;
+  /* Red/Orange for Purchase Price */
+}
+
+.dateRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #ebedf0;
+}
+
+.dateLabel {
+  font-size: 0.75rem;
+  color: #8a8d91;
+}
+
+.dateValue {
+  font-size: 0.75rem;
+  color: #4b4f56;
+  font-weight: 500;
 }
 
 /* Loading */
@@ -285,4 +371,61 @@
   .location {
     font-size: 0.75rem;
   }
+}
+
+/* Batches Modal Styles */
+.modalTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modalHeaderImage {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
+.modalTableContainer {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.batchesTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: white;
+}
+
+.batchesTable th {
+  background: #f8f9fa;
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 2px solid #e5e7eb;
+  color: #4b4f56;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.batchesTable td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #ebedf0;
+  color: #1c1e21;
+}
+
+.batchesTable tr:hover {
+  background: #f8f9fa;
+}
+
+.tablePurchasePrice {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.tableSalePrice {
+  color: #28a745;
+  font-weight: 600;
 }
