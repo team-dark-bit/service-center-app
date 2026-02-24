@@ -80,8 +80,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Dropdown de búsqueda */
@@ -219,7 +226,8 @@
 /* Grid de Productos SELECCIONADOS - 3 COLUMNAS FIJAS */
 .selectedProductsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas fijas */
+  grid-template-columns: repeat(3, 1fr);
+  /* 3 columnas fijas */
   gap: 0.8rem;
   max-height: 75vh;
   overflow-y: auto;
@@ -257,6 +265,32 @@
 .selectedCard:hover {
   transform: scale(1.02);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.viewBatchesCardButton {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #1877f2;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.viewBatchesCardButton:hover {
+  background: #1877f2;
+  color: white;
+  transform: scale(1.1);
 }
 
 .removeCardButton {
@@ -439,12 +473,13 @@
 }
 
 /* IMPORTANTE: Elimina el margin-bottom del SearchSelect cuando está dentro de clientInputGroup */
-.clientInputGroup .searchSelectWrapper > div {
+.clientInputGroup .searchSelectWrapper>div {
   margin-bottom: 0 !important;
 }
 
 .clientInputGroup .addButton {
-  height: 42px; /* Altura del input (0.75rem padding top + 0.75rem padding bottom + font-size) */
+  height: 42px;
+  /* Altura del input (0.75rem padding top + 0.75rem padding bottom + font-size) */
   min-width: 42px;
   width: 42px;
   padding: 0;
@@ -455,6 +490,7 @@
   flex-shrink: 0;
   margin-bottom: 0;
 }
+
 /* Tabla - MÁS COMPACTA */
 .productsTable {
   width: 100%;
@@ -496,13 +532,35 @@
   border-color: #007bff;
 }
 
+.tableBatchButton {
+  background: #f0f7ff;
+  border: 1px solid #d0e7ff;
+  color: #007bff;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  margin: 0 auto;
+}
+
+.tableBatchButton:hover {
+  background: #007bff;
+  color: white;
+}
+
 .deleteButton {
   background: #dc3545;
   border: none;
   color: white;
   border-radius: 4px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  /* Increased slightly for consistency */
+  height: 22px;
   cursor: pointer;
   font-size: 1.1rem;
   display: flex;
