@@ -65,6 +65,8 @@ const CreateSale = () => {
 
   const [saleItems, setSaleItems] = useState([]);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [selectedItemForBatch, setSelectedItemForBatch] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -139,6 +141,7 @@ const CreateSale = () => {
                 stock: totalStock,
                 purchasePrice: purchasePrice,
                 salePrice: salePrice,
+                batches: pkg.batches || [],
               });
             });
           }
@@ -181,6 +184,7 @@ const CreateSale = () => {
       quantity: 1,
       salePrice: product.salePrice,
       total: product.salePrice,
+      batches: product.batches,
     };
 
     setSaleItems((prev) => [...prev, newItem]);
@@ -208,6 +212,30 @@ const CreateSale = () => {
 
   const handleRemoveItem = (id) => {
     setSaleItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleViewBatches = (item) => {
+    setSelectedItemForBatch(item);
+    setIsBatchModalOpen(true);
+  };
+
+  const handleSelectBatch = (batch) => {
+    if (!selectedItemForBatch) return;
+
+    setSaleItems((prev) =>
+      prev.map((item) =>
+        item.id === selectedItemForBatch.id
+          ? {
+            ...item,
+            salePrice: batch.saleUnitPrice,
+            purchasePrice: batch.purchaseUnitPrice,
+            total: item.quantity * batch.saleUnitPrice,
+          }
+          : item
+      )
+    );
+    setIsBatchModalOpen(false);
+    setSelectedItemForBatch(null);
   };
 
   const calculateTotal = () => {
@@ -490,6 +518,16 @@ const CreateSale = () => {
             {saleItems.length > 0 ? (
               saleItems.map((item) => (
                 <div key={item.id} className={styles.selectedCard}>
+                  {item.batches && item.batches.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleViewBatches(item)}
+                      className={styles.viewBatchesCardButton}
+                      title="Ver y seleccionar lotes"
+                    >
+                      <i className="bi bi-eye-fill"></i>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleRemoveItem(item.id)}
@@ -627,6 +665,7 @@ const CreateSale = () => {
             <table className={styles.productsTable}>
               <thead>
                 <tr>
+                  <th></th>
                   <th>Nombre</th>
                   <th>Cant.</th>
                   <th>P.V.(S/.)</th>
@@ -638,6 +677,18 @@ const CreateSale = () => {
                 {saleItems.length > 0 ? (
                   saleItems.map((item, index) => (
                     <tr key={item.id}>
+                      <td>
+                        {item.batches && item.batches.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleViewBatches(item)}
+                            className={styles.tableBatchButton}
+                            title="Cambiar lote"
+                          >
+                            <i className="bi bi-eye-fill"></i>
+                          </button>
+                        )}
+                      </td>
                       <td>{item.name}</td>
                       <td>
                         <input
@@ -665,7 +716,7 @@ const CreateSale = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className={styles.emptyState}>
+                    <td colSpan="6" className={styles.emptyState}>
                       No hay productos en la venta
                     </td>
                   </tr>
@@ -796,39 +847,92 @@ const CreateSale = () => {
                 )}
               </div>
             )}
+        </div>
 
-          {/* Teléfono */}
-          <Input
-            label="Teléfono"
-            name="phoneNumber"
-            value={clientModalData.phoneNumber}
-            onChange={handleClientModalInputChange}
-            placeholder="Ingrese el teléfono"
-            maxLength={15}
-          />
+        {/* Teléfono */}
+        <Input
+          label="Teléfono"
+          name="phoneNumber"
+          value={clientModalData.phoneNumber}
+          onChange={handleClientModalInputChange}
+          placeholder="Ingrese el teléfono"
+          maxLength={15}
+        />
 
-          {/* Botones */}
-          <div className={styles.modalActions}>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setIsClientModalOpen(false);
-                setClientModalData({
-                  documentType: "DNI",
-                  documentNumber: "",
-                  fullName: "",
-                  companyName: "",
-                  phoneNumber: "",
-                });
-                setClientModalErrors({});
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button type="button" variant="primary" onClick={handleSaveClient}>
+        {/* Botones */}
+        <div className={styles.modalActions}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setIsClientModalOpen(false);
+              setClientModalData({
+                documentType: "DNI",
+                documentNumber: "",
+                fullName: "",
+                companyName: "",
+                phoneNumber: "",
+              });
+              setClientModalErrors({});
+            }}
+          >
+            Cancelar
+          </Button>
+          <div className={styles.modalFooter}>
+            <Button onClick={handleSaveClient} variant="primary">
               Guardar Cliente
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de Selección de Lotes */}
+      <Modal
+        isOpen={isBatchModalOpen}
+        onClose={() => {
+          setIsBatchModalOpen(false);
+          setSelectedItemForBatch(null);
+        }}
+        title={
+          <div className={styles.modalTitleContainer}>
+            <span>Seleccionar Lote: {selectedItemForBatch?.name}</span>
+          </div>
+        }
+        size="large"
+      >
+        <div className={styles.modalContent}>
+          <div className={styles.modalTableContainer}>
+            <table className={styles.batchesTable}>
+              <thead>
+                <tr>
+                  <th>Fecha Compra</th>
+                  <th>Stock</th>
+                  <th>P. Compra</th>
+                  <th>P. Venta</th>
+                  <th>Lote #</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedItemForBatch?.batches?.map((batch, idx) => (
+                  <tr key={idx}>
+                    <td>{new Date(batch.purchaseDate).toLocaleDateString()}</td>
+                    <td>{batch.quantityAvailable}</td>
+                    <td className={styles.tablePurchasePrice}>S/ {batch.purchaseUnitPrice.toFixed(2)}</td>
+                    <td className={styles.tableSalePrice}>S/ {batch.saleUnitPrice.toFixed(2)}</td>
+                    <td>{batch.batchNumber || idx + 1}</td>
+                    <td>
+                      <button
+                        className={styles.selectBatchBtn}
+                        onClick={() => handleSelectBatch(batch)}
+                      >
+                        Seleccionar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </Modal>
