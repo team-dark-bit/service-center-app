@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import styles from "./Sidebar.module.css";
+import logo from "../../assets/logo.png";
 
 const Sidebar = () => {
   const [activeMenus, setActiveMenus] = useState({});
@@ -352,16 +353,15 @@ const Sidebar = () => {
       level === 0
         ? ""
         : level === 1
-        ? styles.paddingLevel1
-        : styles.paddingLevel2;
+          ? styles.paddingLevel1
+          : styles.paddingLevel2;
 
     return (
       <div key={item.id} className={styles.menuItem}>
         {hasSubItems ? (
           <button
-            className={`${styles.sidebarItem} ${paddingClass} ${
-              isActive ? styles.active : ""
-            }`}
+            className={`${styles.sidebarItem} ${paddingClass} ${isActive ? styles.active : ""
+              }`}
             onClick={() => toggleMenu(item.id)}
             aria-expanded={showSubItems}
             title={isCollapsed ? item.title : ""}
@@ -371,9 +371,8 @@ const Sidebar = () => {
               <>
                 <span className={styles.sidebarText}>{item.title}</span>
                 <span
-                  className={`${styles.sidebarArrow} ${
-                    showSubItems ? styles.rotated : ""
-                  }`}
+                  className={`${styles.sidebarArrow} ${showSubItems ? styles.rotated : ""
+                    }`}
                 >
                   ▼
                 </span>
@@ -443,12 +442,12 @@ const Sidebar = () => {
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
             <img
-              src="/api/placeholder/40/40"
+              src={logo}
               alt="Logo"
               className={styles.logoImage}
             />
             {(!isCollapsed || isMobile) && (
-              <h4 className={styles.logoText}>MiEmpresa</h4>
+              <h4 className={styles.logoText}>D & F Motors</h4>
             )}
           </div>
 
