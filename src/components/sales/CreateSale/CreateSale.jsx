@@ -518,45 +518,50 @@ const CreateSale = () => {
             {saleItems.length > 0 ? (
               saleItems.map((item) => (
                 <div key={item.id} className={styles.selectedCard}>
-                  {item.batches && item.batches.length > 1 && (
+                  <div className={styles.imageContainer}>
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className={styles.selectedCardImage}
+                    />
+                    {item.batches && item.batches.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleViewBatches(item)}
+                        className={styles.viewBatchesCardButton}
+                        title="Ver y seleccionar lotes"
+                      >
+                        <i className="bi bi-eye-fill"></i>
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={() => handleViewBatches(item)}
-                      className={styles.viewBatchesCardButton}
-                      title="Ver y seleccionar lotes"
+                      onClick={() => handleRemoveItem(item.id)}
+                      className={styles.removeCardButton}
                     >
-                      <i className="bi bi-eye-fill"></i>
+                      ×
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveItem(item.id)}
-                    className={styles.removeCardButton}
-                  >
-                    ×
-                  </button>
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className={styles.selectedCardImage}
-                  />
-                  <div className={styles.selectedCardInfo}>
-                    <p className={styles.selectedCardName}>{item.name}</p>
+                    <div className={styles.stockBadge}>
+                      <span className={styles.stockText}>
+                        Stock: {item.stock} unid.
+                      </span>
+                    </div>
+                  </div>
 
-                    <p className={styles.selectedCardPricePurchase}>
-                      <span>P. Compra:</span>
-                      <span>S/ {item.purchasePrice.toFixed(2)}</span>
-                    </p>
+                  <div className={styles.selectedCardContent}>
+                    <h3 className={styles.selectedCardName}>{item.name}</h3>
 
-                    <p className={styles.selectedCardPriceSale}>
-                      <span>P. Venta:</span>
-                      <span>S/ {item.salePrice.toFixed(2)}</span>
-                    </p>
+                    <div className={styles.selectedCardFooter}>
+                      <div className={styles.priceRow}>
+                        <span className={styles.priceLabel}>P. Venta:</span>
+                        <span className={styles.priceValue}>S/ {item.salePrice.toFixed(2)}</span>
+                      </div>
 
-                    <p className={styles.selectedCardStock}>
-                      <span>Stock:</span>
-                      <span>{item.stock} unid.</span>
-                    </p>
+                      <div className={styles.purchasePriceRow}>
+                        <span className={styles.purchasePriceLabel}>P. Compra:</span>
+                        <span className={styles.purchasePriceValue}>S/ {item.purchasePrice.toFixed(2)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
@@ -896,6 +901,13 @@ const CreateSale = () => {
         title={
           <div className={styles.modalTitleContainer}>
             <span>Seleccionar Lote: {selectedItemForBatch?.name}</span>
+            {selectedItemForBatch?.imageUrl && (
+              <img
+                src={selectedItemForBatch.imageUrl}
+                alt={selectedItemForBatch.name}
+                className={styles.modalHeaderImage}
+              />
+            )}
           </div>
         }
         size="large"
