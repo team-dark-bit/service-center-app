@@ -50,8 +50,8 @@
 }
 
 .logoImage {
-  width: 32px;
-  height: 32px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -62,6 +62,7 @@
   color: white;
   font-size: 1.2rem;
   font-weight: 600;
+  font-family: "Sofia";
   margin: 0;
   white-space: nowrap;
   opacity: 1;
@@ -152,10 +153,10 @@
   /* Solo mostrar scrollbar cuando hay contenido que lo requiera */
   scrollbar-width: thin;
   scrollbar-color: #444 transparent;
-  
+
   /* Smooth scrolling */
   scroll-behavior: smooth;
-  
+
   /* Optimización para scroll */
   -webkit-overflow-scrolling: touch;
 }
@@ -439,12 +440,12 @@
   .sidebar:not(.mobile) {
     width: 72px;
   }
-  
+
   .sidebar:not(.mobile) .sidebarItem {
     justify-content: center;
     padding: 12px 20px;
   }
-  
+
   .sidebar:not(.mobile) .sidebarItem:hover {
     border-radius: 8px;
     margin: 2px 8px;
@@ -457,7 +458,7 @@
   .sidebar:not(.mobileOpen) {
     transform: translateX(-100%);
   }
-  
+
   .hamburger {
     display: flex;
   }
