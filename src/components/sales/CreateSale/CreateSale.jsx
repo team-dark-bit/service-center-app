@@ -8,6 +8,7 @@ import styles from "./CreateSale.module.css";
 import { getTodayDate } from "@/utils/date-utils";
 import customerApi from "@/api/customerApi";
 import productApi from "@/api/productApi";
+import salesApi from "@/api/salesApi";
 import SearchSelect from "@/components/common/SearchSelect";
 
 const CreateSale = () => {
@@ -409,6 +410,11 @@ const CreateSale = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.clientId) {
+      Swal.fire("Error", "Debe seleccionar un cliente", "error");
+      return;
+    }
+
     if (saleItems.length === 0) {
       Swal.fire("Error", "Debe agregar al menos un producto", "error");
       return;
@@ -416,31 +422,63 @@ const CreateSale = () => {
 
     setIsLoading(true);
 
-    // Simulación de envío
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const subtotal = saleItems.reduce((sum, item) => sum + item.total, 0);
+      const igvRate = 18.0;
+      const total = subtotal;
 
-    setIsLoading(false);
+      const payload = {
+        customerId: formData.clientId,
+        userId: "20c8c4e5-d051-45c0-a3b7-109408885d44", // ID fijo según requerimiento
+        igv: igvRate,
+        subtotal: parseFloat(subtotal.toFixed(2)),
+        total: parseFloat(total.toFixed(2)),
+        discount: 0.0,
+        details: saleItems.map((item) => ({
+          itemType: "product",
+          productPackageId: item.id,
+          serviceId: null,
+          quantity: item.quantity,
+          unitPrice: item.salePrice,
+          subtotal: item.total,
+          discount: 0.0,
+          description: null,
+        })),
+      };
 
-    Swal.fire({
-      title: "¡Venta Realizada!",
-      text: `Total: S/ ${calculateTotal()}`,
-      icon: "success",
-      confirmButtonText: "Continuar",
-    }).then(() => {
-      // Reset form
-      setSaleItems([]);
-      setFormData({
-        ...formData,
-        saleNumber: "",
-        clientName: "",
-        clientDni: "",
-        clientPhone: "",
-        userName: "ADMINISTRADOR",
-        paymentMethod: "1",
-        saleDate: getTodayDate(),
-        documentType: "1",
+      await salesApi.create(payload);
+
+      Swal.fire({
+        title: "¡Venta Realizada!",
+        text: `Total: S/ ${total.toFixed(2)}`,
+        icon: "success",
+        confirmButtonText: "Continuar",
+      }).then(() => {
+        // Reset form
+        setSaleItems([]);
+        setFormData({
+          ...formData,
+          clientId: "", // Clear client too
+          saleNumber: "",
+          clientName: "",
+          clientDni: "",
+          clientPhone: "",
+          userName: "ADMINISTRADOR",
+          paymentMethod: "1",
+          saleDate: getTodayDate(),
+          documentType: "1",
+        });
       });
-    });
+    } catch (error) {
+      console.error("Error al realizar la venta:", error);
+      Swal.fire(
+        "Error",
+        "No se pudo registrar la venta. Intente nuevamente.",
+        "error"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
