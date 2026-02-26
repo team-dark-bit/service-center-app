@@ -211,6 +211,34 @@ const CreateSale = () => {
     });
   };
 
+  const handlePriceChange = (index, value) => {
+    const numValue = parseFloat(value) || 0;
+    if (numValue < 0) return;
+
+    setSaleItems((prev) => {
+      const updated = [...prev];
+      updated[index].salePrice = numValue;
+      updated[index].total = updated[index].quantity * numValue;
+      return updated;
+    });
+  };
+
+  const handleAddService = () => {
+    const newService = {
+      id: `service-${Date.now()}`,
+      itemType: "service",
+      serviceId: "39865f86-96fc-4811-bef6-812ba32c6c0e",
+      description: "Mantenimiento",
+      quantity: 1,
+      salePrice: 0.0,
+      purchasePrice: 0.0,
+      total: 0.0,
+      imageUrl: "https://cdn-icons-png.flaticon.com/512/3067/3067451.png", // Icono de servicio
+    };
+
+    setSaleItems((prev) => [...prev, newService]);
+  };
+
   const handleRemoveItem = (id) => {
     setSaleItems((prev) => prev.filter((item) => item.id !== id));
   };
@@ -425,24 +453,24 @@ const CreateSale = () => {
     try {
       const subtotal = saleItems.reduce((sum, item) => sum + item.total, 0);
       const igvRate = 18.0;
-      const total = subtotal;
+      const total = subtotal; // Siguiendo el ejemplo del usuario: total = subtotal
 
       const payload = {
         customerId: formData.clientId,
-        userId: "20c8c4e5-d051-45c0-a3b7-109408885d44", // ID fijo según requerimiento
+        userId: "20c8c4e5-d051-45c0-a3b7-109408885d44",
         igv: igvRate,
         subtotal: parseFloat(subtotal.toFixed(2)),
         total: parseFloat(total.toFixed(2)),
         discount: 0.0,
         details: saleItems.map((item) => ({
-          itemType: "product",
-          productPackageId: item.id,
-          serviceId: null,
+          itemType: item.itemType || "product",
+          productPackageId: item.itemType === "service" ? null : item.id,
+          serviceId: item.itemType === "service" ? item.serviceId : null,
           quantity: item.quantity,
           unitPrice: item.salePrice,
           subtotal: item.total,
           discount: 0.0,
-          description: null,
+          description: item.itemType === "service" ? item.description : null,
         })),
       };
 
@@ -592,12 +620,12 @@ const CreateSale = () => {
                     <div className={styles.selectedCardFooter}>
                       <div className={styles.priceRow}>
                         <span className={styles.priceLabel}>P. Venta:</span>
-                        <span className={styles.priceValue}>S/ {item.salePrice.toFixed(2)}</span>
+                        <span className={styles.priceValue}>S/ {(item.salePrice || 0).toFixed(2)}</span>
                       </div>
 
                       <div className={styles.purchasePriceRow}>
                         <span className={styles.purchasePriceLabel}>P. Compra:</span>
-                        <span className={styles.purchasePriceValue}>S/ {item.purchasePrice.toFixed(2)}</span>
+                        <span className={styles.purchasePriceValue}>S/ {(item.purchasePrice || 0).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -701,6 +729,18 @@ const CreateSale = () => {
                 value={formData.saleDate}
                 onChange={handleInputChange}
               />
+
+              <div className={styles.addServiceWrapper}>
+                <Button
+                  type="button"
+                  onClick={handleAddService}
+                  variant="outline"
+                  size="small"
+                  className={styles.addServiceButton}
+                >
+                  + Servicio
+                </Button>
+              </div>
             </div>
 
             {/* Tabla de productos */}
@@ -732,7 +772,7 @@ const CreateSale = () => {
                           </button>
                         )}
                       </td>
-                      <td>{item.name}</td>
+                      <td>{item.itemType === "service" ? item.description : item.name}</td>
                       <td>
                         <input
                           type="number"
@@ -742,9 +782,25 @@ const CreateSale = () => {
                           }
                           className={styles.tableInput}
                           min="1"
+                          disabled={item.itemType === "service"}
                         />
                       </td>
-                      <td>{item.salePrice.toFixed(2)}</td>
+                      <td>
+                        {item.itemType === "service" ? (
+                          <input
+                            type="number"
+                            value={item.salePrice}
+                            onChange={(e) =>
+                              handlePriceChange(index, e.target.value)
+                            }
+                            className={styles.tableInput}
+                            min="0"
+                            step="0.01"
+                          />
+                        ) : (
+                          item.salePrice.toFixed(2)
+                        )}
+                      </td>
                       <td>{item.total.toFixed(2)}</td>
                       <td>
                         <button
