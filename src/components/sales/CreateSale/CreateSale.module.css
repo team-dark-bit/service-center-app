@@ -532,6 +532,16 @@
   align-items: flex-end;
 }
 
+.addServiceWrapper {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.addServiceButton {
+  margin-bottom: 0px;
+}
+
 .clientInputGroup .searchSelectWrapper {
   flex: 1;
   min-width: 0;
