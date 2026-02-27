@@ -46,6 +46,7 @@ const ProductList = () => {
               id: pkg.productPackageId,
               name: product.productName,
               packageName: pkg.packageCodedName,
+              packageDescription: pkg.packageDescription, // Added
               saleUnitPrice: firstBatch ? firstBatch.saleUnitPrice : 0,
               purchaseUnitPrice: firstBatch ? firstBatch.purchaseUnitPrice : 0,
               purchaseDate: firstBatch ? firstBatch.purchaseDate : null,
@@ -136,6 +137,8 @@ const ProductList = () => {
 
                 <div className={styles.cardContent}>
                   <h3 className={styles.productName}>{product.name}</h3>
+                  <p className={styles.packageDescription}>{product.packageDescription}</p>
+                  <p className={styles.packageCodedName}>({product.packageName})</p>
 
                   <div className={styles.cardFooter}>
                     <div className={styles.priceRow}>

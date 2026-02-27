@@ -374,6 +374,7 @@ const ProductCatalog = () => {
               <table>
                 <thead>
                   <tr>
+                    <th>Imagen</th>
                     <th>SKU</th>
                     <th>Código de Barras</th>
                     <th>Unidad</th>
@@ -383,6 +384,13 @@ const ProductCatalog = () => {
                 <tbody>
                   {selectedProduct.packages.map((pkg) => (
                     <tr key={pkg.id}>
+                      <td>
+                        <img
+                          src={pkg.imageUrl}
+                          alt={pkg.packageName}
+                          className={styles.packageThumbnail}
+                        />
+                      </td>
                       <td><strong>{pkg.sku}</strong></td>
                       <td>{pkg.barcode}</td>
                       <td>{pkg.unitName}</td>
