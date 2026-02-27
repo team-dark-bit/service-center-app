@@ -137,7 +137,9 @@ const CreateSale = () => {
 
               mappedResults.push({
                 id: pkg.productPackageId,
-                name: `${product.productName} (${pkg.packageCodedName})`,
+                name: product.productName,
+                packageName: pkg.packageCodedName,
+                packageDescription: pkg.packageDescription,
                 imageUrl: pkg.imageUrl || "https://bateriasaltoque.pe/wp-content/uploads/2021/05/YTX9-BSprueba-1.jpg",
                 stock: totalStock,
                 purchasePrice: purchasePrice,
@@ -179,6 +181,8 @@ const CreateSale = () => {
     const newItem = {
       id: product.id,
       name: product.name,
+      packageName: product.packageName,
+      packageDescription: product.packageDescription,
       imageUrl: product.imageUrl,
       stock: product.stock,
       purchasePrice: product.purchasePrice,
@@ -547,6 +551,9 @@ const CreateSale = () => {
                     />
                     <div className={styles.dropdownItemInfo}>
                       <p className={styles.dropdownItemName}>{product.name}</p>
+                      <p className={styles.dropdownItemDescription}>
+                        {product.packageDescription} <span className={styles.dropdownItemCodedName}>({product.packageName})</span>
+                      </p>
                       <p className={styles.dropdownItemPrice}>
                         S/ {product.salePrice.toFixed(2)}
                       </p>
@@ -616,6 +623,8 @@ const CreateSale = () => {
 
                   <div className={styles.selectedCardContent}>
                     <h3 className={styles.selectedCardName}>{item.name}</h3>
+                    <p className={styles.selectedCardDescription}>{item.packageDescription}</p>
+                    <p className={styles.selectedCardCodedName}>({item.packageName})</p>
 
                     <div className={styles.selectedCardFooter}>
                       <div className={styles.priceRow}>
