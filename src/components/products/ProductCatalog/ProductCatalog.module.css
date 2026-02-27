@@ -733,6 +733,14 @@
   background: #f8f9fa;
 }
 
+.packageThumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header {
