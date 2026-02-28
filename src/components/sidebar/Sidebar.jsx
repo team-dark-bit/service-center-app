@@ -287,6 +287,25 @@ const Sidebar = () => {
       ],
     },
     {
+      id: "servicios",
+      title: "Servicio Mecanico",
+      icon: "🛠️",
+      subItems: [
+        {
+          id: "nuevo-servicio",
+          title: "Nuevo Servicio",
+          href: "/mechanical-services/create",
+          icon: "➕",
+        },
+        {
+          id: "listar-servicios",
+          title: "Listar Servicio",
+          href: "/mechanical-services",
+          icon: "📋",
+        },
+      ],
+    },
+    {
       id: "configuracion",
       title: "Configuración",
       icon: "⚙️",
