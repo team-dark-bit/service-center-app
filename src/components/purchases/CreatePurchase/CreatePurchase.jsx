@@ -306,7 +306,7 @@ const CreatePurchase = () => {
                         onClick={() => handleSelectProduct(product)}
                         className={styles.dropdownItem}
                       >
-                        {product.productName}
+                        {product.productName} {product.packageDescription}
                         {product.codedName && (
                           <span> - {product.codedName}</span>
                         )}{" "}

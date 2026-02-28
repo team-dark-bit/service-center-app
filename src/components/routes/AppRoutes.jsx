@@ -8,6 +8,8 @@ import CreateSale from "../sales/CreateSale/CreateSale";
 import CreateCustomer from "../customers/CreateCustomer/CreateCustomer";
 import CustomerList from "../customers/CustomerList/CustomerList";
 import ProductCatalog from "../products/ProductCatalog/ProductCatalog";
+import CreateMechanicalService from "../mechanicalServices/CreateService/CreateMechanicalService";
+import MechanicalServiceList from "../mechanicalServices/ServiceList/MechanicalServiceList";
 
 export const AppRoutes = () => {
   return (
@@ -48,6 +50,12 @@ export const AppRoutes = () => {
 
       {/* ============== CATÁLOGO DE PRODUCTOS ============== */}
       <Route path="products/catalog" element={<ProductCatalog />} />
+
+      {/* ============== SERVICIOS MECANICOS ============== */}
+      <Route path="mechanical-services">
+        <Route index element={<MechanicalServiceList />} /> {/* /mechanical-services */}
+        <Route path="create" element={<CreateMechanicalService />} /> {/* /mechanical-services/create */}
+      </Route>
 
       {/* Ruta 404 - Página no encontrada */}
       <Route path="*" element={<Navigate to="/products" replace />} />
